@@ -240,6 +240,33 @@ const SERIES = [
     {id:"svp",     title:"Black Star Promos",    code:"SVP", date:"2023-01-01"},
     {id:"sve",     title:"Scarlet & Violet Energy", code:"SVE", date:"2023-03-31"},
   ]},
+  { id:"swsh", title:"Sword & Shield", eyebrow:"English TCG", sets:[
+    {id:"swsh12.5gg", title:"Crown Zenith Galarian Gallery", code:"CRZ-GG", date:"2023-01-20"},
+    {id:"swsh12.5", title:"Crown Zenith", code:"CRZ", date:"2023-01-20"},
+    {id:"swsh12tg", title:"Silver Tempest Trainer Gallery", code:"SIT-TG", date:"2022-11-11"},
+    {id:"swsh12", title:"Silver Tempest", code:"SIT", date:"2022-11-11"},
+    {id:"swsh11tg", title:"Lost Origin Trainer Gallery", code:"LOR-TG", date:"2022-09-09"},
+    {id:"swsh11", title:"Lost Origin", code:"LOR", date:"2022-09-09"},
+    {id:"swsh10.5", title:"Pokémon GO", code:"PGO", date:"2022-07-01"},
+    {id:"swsh10tg", title:"Astral Radiance Trainer Gallery", code:"ASR-TG", date:"2022-05-27"},
+    {id:"swsh10", title:"Astral Radiance", code:"ASR", date:"2022-05-27"},
+    {id:"swsh9tg", title:"Brilliant Stars Trainer Gallery", code:"BRS-TG", date:"2022-02-25"},
+    {id:"swsh9", title:"Brilliant Stars", code:"BRS", date:"2022-02-25"},
+    {id:"swsh8", title:"Fusion Strike", code:"FST", date:"2021-11-12"},
+    {id:"cel25cc", title:"Celebrations: Classic Collection", code:"CEL-CC", date:"2021-10-08"},
+    {id:"cel25", title:"Celebrations", code:"CEL", date:"2021-10-08"},
+    {id:"swsh7", title:"Evolving Skies", code:"EVS", date:"2021-08-27"},
+    {id:"swsh6", title:"Chilling Reign", code:"CRE", date:"2021-06-18"},
+    {id:"swsh5", title:"Battle Styles", code:"BST", date:"2021-03-19"},
+    {id:"swsh4.5sv", title:"Shining Fates Shiny Vault", code:"SHF-SV", date:"2021-02-19"},
+    {id:"swsh4.5", title:"Shining Fates", code:"SHF", date:"2021-02-19"},
+    {id:"swsh4", title:"Vivid Voltage", code:"VIV", date:"2020-11-13"},
+    {id:"swsh3.5", title:"Champion's Path", code:"CPA", date:"2020-09-25"},
+    {id:"swsh3", title:"Darkness Ablaze", code:"DAA", date:"2020-08-14"},
+    {id:"swsh2", title:"Rebel Clash", code:"RCL", date:"2020-05-01"},
+    {id:"swsh1", title:"Sword & Shield", code:"SSH", date:"2020-02-07"},
+    {id:"swshp", title:"Black Star Promos", code:"SWSH", date:"2019-11-15"},
+  ]},
   { id:"special", title:"Special", eyebrow:"One-off collections", sets:[
     {id:"c151", title:"Collect 151", code:"151C", date:"2025-01-17", local:true, sub:"Simplified Chinese"},
   ]},
@@ -248,7 +275,7 @@ const SERIES = [
 /* ---------- English card data from TCGdex ---------- */
 const TCG = "https://api.tcgdex.net/v2/en";
 const PKSYM = {"me06":"me06","30th":"cel30","30th-c":"cel30c","me05":"me05","me04":"me04","me03":"me03","me02.5":"me02pt5","me02":"me02","me01":"me01","mep":"MEP","mee":"mee",
-  "sv10.5w":"sv10pt5_wht","sv10.5b":"sv10pt5_blk","sv10":"sv10","sv09":"sv9","sv08.5":"sv8pt5","sv08":"sv8","sv07":"sv7","sv06.5":"sv6pt5","sv06":"sv6","sv05":"sv5","sv04.5":"sv4pt5","sv04":"sv4","sv03.5":"sv3pt5","sv03":"sv3","sv02":"sv2","sv01":"sv1","svp":"svp","sve":"sve23"};
+  "sv10.5w":"sv10pt5_wht","sv10.5b":"sv10pt5_blk","sv10":"sv10","sv09":"sv9","sv08.5":"sv8pt5","sv08":"sv8","sv07":"sv7","sv06.5":"sv6pt5","sv06":"sv6","sv05":"sv5","sv04.5":"sv4pt5","sv04":"sv4","sv03.5":"sv3pt5","sv03":"sv3","sv02":"sv2","sv01":"sv1","svp":"svp","sve":"sve23","swsh12.5gg":"swsh12pt5gg","swsh12.5":"swsh12pt5","swsh12tg":"swsh12tg","swsh12":"swsh12","swsh11tg":"swsh11tg","swsh11":"swsh11","swsh10.5":"pgo","swsh10tg":"swsh10tg","swsh10":"swsh10","swsh9tg":"swsh9tg","swsh9":"swsh9","swsh8":"swsh8","cel25cc":"cel25c","cel25":"cel25","swsh7":"swsh7","swsh6":"swsh6","swsh5":"swsh5","swsh4.5sv":"swsh45sv","swsh4.5":"swsh45","swsh4":"swsh4","swsh3.5":"swsh35","swsh3":"swsh3","swsh2":"swsh2","swsh1":"swsh1","swshp":"swshp"};
 const seriesOf = id => (SERIES.find(sr=>sr.sets.some(m=>m.id===id))||{id:"me"}).id;
 const CACHE = "pkmn-binder-cards-v2", CACHE_DAYS = 3;
 const FOIL = {"":"Reverse holo",pokeball:"Poké Ball",masterball:"Master Ball",energy:"Energy reverse",friendball:"Friend Ball",loveball:"Love Ball",quickball:"Quick Ball",duskball:"Dusk Ball","team-rocket":"Team Rocket"};
@@ -438,7 +465,7 @@ function renderHome(){
 }
 async function loadAll(force){
   const todo = SERIES.flatMap(s=>s.sets).filter(m=>!m.local);
-  await pool(todo, 3, async m=>{ try{ await fetchSet(m.id, force); }catch(e){} if(view==="home") renderHome(); else if(setId===m.id) renderSet(); });
+  await pool(todo, 4, async m=>{ try{ await fetchSet(m.id, force); }catch(e){} if(view==="home") renderHome(); else if(setId===m.id) renderSet(); });
 }
 
 /* ---------- binder ---------- */
@@ -564,11 +591,11 @@ async function runImport(){
   for(const data of todo){
   for(const [sid, str] of Object.entries(data.sets)){
     if(!cache[sid]){ try{ await fetchSet(sid); }catch(e){ missed.push(sid+" (set not loaded)"); continue; } }
-    const byLid = {}; for(const row of cache[sid].rows) byLid[row[0]] = row[3];
+    const norm = x => String(x).toUpperCase().replace(/^([A-Z]*)0*(\d+)$/,"$1$2"); const byLid = {}, realLid = {}; for(const row of cache[sid].rows){ byLid[norm(row[0])] = row[3]; realLid[norm(row[0])] = row[0]; }
     const list = new Set(progress.sets[sid]||[]);
     for(const item of str.split(",")){
-      const [lid, codes] = item.split(":"); const vs = byLid[lid];
-      if(!vs){ missed.push(sid+" "+lid); continue; }
+      const [plid, codes] = item.split(":"); const lid = realLid[norm(plid)]; const vs = byLid[norm(plid)];
+      if(!vs){ missed.push(sid+" "+plid); continue; }
       for(const code of codes.split("+")){
         let k = PK[code];
         if(!vs.includes(k)){
