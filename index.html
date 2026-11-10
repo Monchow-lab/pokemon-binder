@@ -55,7 +55,11 @@ input[type=search]{flex:1 1 220px}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 .tile{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:12px;background:var(--tile);border:1px solid var(--line);text-decoration:none;cursor:pointer;transition:transform .12s,border-color .12s;min-width:0}
 .tile:hover{transform:translateY(-2px);border-color:var(--muted)}
-.tile .logo{height:64px;display:flex;align-items:center}
+.tile .top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+.tile .logo{height:64px;display:flex;align-items:center;min-width:0}
+.badge{flex:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:46px;height:46px;padding:4px 6px;border-radius:9px;background:#fff;color:#14171f;box-shadow:0 1px 3px #0003}
+.badge img{height:18px;width:auto;max-width:34px;object-fit:contain}
+.badge b{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.04em;line-height:1}
 .tile .logo img{max-height:64px;max-width:100%;object-fit:contain}
 .tile .logo .alt{font-family:var(--display);font-weight:800;font-size:1.25rem}
 .tile .nm{font-family:var(--display);font-weight:600;font-size:1.05rem}
@@ -405,7 +409,8 @@ function renderHome(){
       const logo = m.local ? "" : m.logo || (cache[m.id]&&cache[m.id].logo) || `https://assets.tcgdex.net/en/${sr.id}/${m.id}/logo`;
       const p = st ? pct(st.own,st.total) : 0;
       return `<a class="tile ${st&&st.total&&st.own===st.total?"done":""}" href="#set-${encodeURIComponent(m.id)}">
-        <div class="logo">${logo?`<img src="${esc(logo)}.png" alt="${esc(m.title)}" loading="lazy" onerror="this.outerHTML='<span class=alt>${esc(m.code)}</span>'">`:`<span class="alt">${esc(m.code)}</span>`}</div>
+        <div class="top"><div class="logo">${logo?`<img src="${esc(logo)}.png" alt="${esc(m.title)}" loading="lazy" onerror="this.outerHTML='<span class=alt>${esc(m.title)}</span>'">`:`<span class="alt">${esc(m.title)}</span>`}</div>
+        <span class="badge" title="Set code ${esc(m.code)}">${m.local?"":`<img src="https://assets.tcgdex.net/univ/${sr.id}/${m.id}/symbol.png" alt="" loading="lazy" onerror="this.remove()">`}<b>${esc(m.code)}</b></span></div>
         <div><div class="nm">${esc(m.title)}</div><div class="dt">${new Date(m.date).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}${m.sub?" · "+esc(m.sub):""} · ${esc(m.code)}</div></div>
         <div class="prog"><div class="bar"><i style="width:${p}%"></i></div><b>${st?p+"%":"…"}</b></div>
         <div class="sub">${st?`${st.own} / ${st.total} collected`:"Loading cards…"}</div>
