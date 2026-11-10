@@ -210,6 +210,26 @@ const SERIES = [
     {id:"mep",    title:"Black Star Promos",               code:"MEP",  date:"2025-09-26"},
     {id:"mee",    title:"Mega Evolution Energy",           code:"MEE",  date:"2025-09-25"},
   ]},
+  { id:"sv", title:"Scarlet & Violet", eyebrow:"English TCG", sets:[
+    {id:"sv10.5w", title:"White Flare",          code:"WHT", date:"2025-07-18"},
+    {id:"sv10.5b", title:"Black Bolt",           code:"BLK", date:"2025-07-18"},
+    {id:"sv10",    title:"Destined Rivals",      code:"DRI", date:"2025-05-30"},
+    {id:"sv09",    title:"Journey Together",     code:"JTG", date:"2025-03-28"},
+    {id:"sv08.5",  title:"Prismatic Evolutions", code:"PRE", date:"2025-01-17"},
+    {id:"sv08",    title:"Surging Sparks",       code:"SSP", date:"2024-11-08"},
+    {id:"sv07",    title:"Stellar Crown",        code:"SCR", date:"2024-09-13"},
+    {id:"sv06.5",  title:"Shrouded Fable",       code:"SFA", date:"2024-08-02"},
+    {id:"sv06",    title:"Twilight Masquerade",  code:"TWM", date:"2024-05-24"},
+    {id:"sv05",    title:"Temporal Forces",      code:"TEF", date:"2024-03-22"},
+    {id:"sv04.5",  title:"Paldean Fates",        code:"PAF", date:"2024-01-26"},
+    {id:"sv04",    title:"Paradox Rift",         code:"PAR", date:"2023-11-03"},
+    {id:"sv03.5",  title:"151",                  code:"MEW", date:"2023-09-22"},
+    {id:"sv03",    title:"Obsidian Flames",      code:"OBF", date:"2023-08-11"},
+    {id:"sv02",    title:"Paldea Evolved",       code:"PAL", date:"2023-06-09"},
+    {id:"sv01",    title:"Scarlet & Violet",     code:"SVI", date:"2023-03-31"},
+    {id:"svp",     title:"Black Star Promos",    code:"SVP", date:"2023-01-01"},
+    {id:"sve",     title:"Scarlet & Violet Energy", code:"SVE", date:"2023-03-31"},
+  ]},
   { id:"special", title:"Special", eyebrow:"One-off collections", sets:[
     {id:"c151", title:"Collect 151", code:"151C", date:"2025-01-17", local:true, sub:"Simplified Chinese"},
   ]},
@@ -217,6 +237,7 @@ const SERIES = [
 
 /* ---------- English card data from TCGdex ---------- */
 const TCG = "https://api.tcgdex.net/v2/en";
+const seriesOf = id => (SERIES.find(sr=>sr.sets.some(m=>m.id===id))||{id:"me"}).id;
 const CACHE = "pkmn-binder-cards-v2", CACHE_DAYS = 3;
 const FOIL = {"":"Reverse holo",pokeball:"Poké Ball",masterball:"Master Ball",energy:"Energy reverse",friendball:"Friend Ball",loveball:"Love Ball",quickball:"Quick Ball",duskball:"Dusk Ball","team-rocket":"Team Rocket"};
 const RARE = {"common":"C","uncommon":"U","rare":"R","double rare":"RR","illustration rare":"IR","ultra rare":"UR","special illustration rare":"SIR","mega hyper rare":"MHR","mega attack rare":"MAR","hyper rare":"HR","shiny rare":"SR","none":""};
@@ -241,7 +262,7 @@ async function fetchSet(id, force){
       if(!vs.includes(key)) vs.push(key);
     }
     if(!vs.length) vs.push("n");
-    rows[k] = [c.localId, c.name, d.rarity||"", vs, c.image || `https://assets.tcgdex.net/en/me/${id}/${c.localId}`];
+    rows[k] = [c.localId, c.name, d.rarity||"", vs, c.image || `https://assets.tcgdex.net/en/${seriesOf(id)}/${id}/${c.localId}`];
   });
   cache[id] = { at:Date.now(), official:(st.cardCount&&st.cardCount.official)||rows.length+999, logo:st.logo||"", rows };
   saveCache();
@@ -517,11 +538,13 @@ document.addEventListener("visibilitychange", async()=>{ if(!document.hidden && 
 
 
 /* ---------- one-off import of collected cards from pkmn.gg ---------- */
-const PK = {n:"n",h:"h",r:"r-",E:"r-energy",P:"r-pokeball",F:"r-friendball",L:"r-loveball",Q:"r-quickball",D:"r-duskball",R:"r-team-rocket"};
+const PK = {M:"r-masterball",n:"n",h:"h",r:"r-",E:"r-energy",P:"r-pokeball",F:"r-friendball",L:"r-loveball",Q:"r-quickball",D:"r-duskball",R:"r-team-rocket"};
 async function runImport(){
-  let data; try{ data = await fetch("pkmn-import.json",{cache:"no-store"}).then(r=>r.ok?r.json():null); }catch(e){ return; }
-  if(!data || (progress.imports||[]).includes(data.id)) return;
+  let batches; try{ batches = await fetch("pkmn-import.json",{cache:"no-store"}).then(r=>r.ok?r.json():null); }catch(e){ return; }
+  if(!batches) return; if(!Array.isArray(batches)) batches=[batches];
+  const todo = batches.filter(b=>!(progress.imports||[]).includes(b.id)); if(!todo.length) return;
   let added = 0, missed = [];
+  for(const data of todo){
   for(const [sid, str] of Object.entries(data.sets)){
     if(!cache[sid]){ try{ await fetchSet(sid); }catch(e){ missed.push(sid+" (set not loaded)"); continue; } }
     const byLid = {}; for(const row of cache[sid].rows) byLid[row[0]] = row[3];
@@ -544,6 +567,7 @@ async function runImport(){
     progress.sets[sid] = [...list];
   }
   progress.imports = [...(progress.imports||[]), data.id];
+  }
   progress.updated = new Date().toISOString();
   saveLocal(); writeToFile(); render();
   if(missed.length) console.warn("pkmn.gg import: not matched", missed);
