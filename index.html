@@ -207,6 +207,8 @@ const SERIES = [
     {id:"me02.5", title:"Ascended Heroes",                 code:"ASC",  date:"2026-01-30"},
     {id:"me02",   title:"Phantasmal Flames",               code:"PFL",  date:"2025-11-14"},
     {id:"me01",   title:"Mega Evolution",                  code:"MEG",  date:"2025-09-26"},
+    {id:"mep",    title:"Black Star Promos",               code:"MEP",  date:"2025-09-26"},
+    {id:"mee",    title:"Mega Evolution Energy",           code:"MEE",  date:"2025-09-25"},
   ]},
   { id:"special", title:"Special", eyebrow:"One-off collections", sets:[
     {id:"c151", title:"Collect 151", code:"151C", date:"2025-01-17", local:true, sub:"Simplified Chinese"},
@@ -215,7 +217,7 @@ const SERIES = [
 
 /* ---------- English card data from TCGdex ---------- */
 const TCG = "https://api.tcgdex.net/v2/en";
-const CACHE = "pkmn-binder-cards-v1", CACHE_DAYS = 3;
+const CACHE = "pkmn-binder-cards-v2", CACHE_DAYS = 3;
 const FOIL = {"":"Reverse holo",pokeball:"Poké Ball",masterball:"Master Ball",energy:"Energy reverse",friendball:"Friend Ball",loveball:"Love Ball",quickball:"Quick Ball",duskball:"Dusk Ball","team-rocket":"Team Rocket"};
 const RARE = {"common":"C","uncommon":"U","rare":"R","double rare":"RR","illustration rare":"IR","ultra rare":"UR","special illustration rare":"SIR","mega hyper rare":"MHR","mega attack rare":"MAR","hyper rare":"HR","shiny rare":"SR","none":""};
 let cache = {};
@@ -239,9 +241,9 @@ async function fetchSet(id, force){
       if(!vs.includes(key)) vs.push(key);
     }
     if(!vs.length) vs.push("n");
-    rows[k] = [c.localId, c.name, d.rarity||"", vs, c.image||""];
+    rows[k] = [c.localId, c.name, d.rarity||"", vs, c.image || `https://assets.tcgdex.net/en/me/${id}/${c.localId}`];
   });
-  cache[id] = { at:Date.now(), official:(st.cardCount&&st.cardCount.official)||rows.length, logo:st.logo||"", rows };
+  cache[id] = { at:Date.now(), official:(st.cardCount&&st.cardCount.official)||rows.length+999, logo:st.logo||"", rows };
   saveCache();
   return cache[id];
 }
@@ -250,14 +252,14 @@ function buildCards(id){
   const c = cache[id]; if(!c) return null;
   const cards = [];
   for(const [lid, name, rarity, vs, img] of c.rows){
-    const no = parseInt(lid,10), secret = no > c.official, rar = RARE[(rarity||"").toLowerCase()] ?? rarity;
+    const no = parseInt(lid,10), secret = no > c.official && c.official < c.rows.length+999, rar = RARE[(rarity||"").toLowerCase()] ?? rarity;
     const sorted = [...vs].sort((a,b)=>ORDER(a)-ORDER(b));
     for(const k of sorted){
       let v, cls;
       if(k==="n"){ v = vs.includes("h") ? "Non-holo" : "Normal"; cls = ""; }
       else if(k==="h"){ v = secret ? (rarity||"Secret rare") : "Holo"; cls = secret ? "sec" : "holo"; }
       else { const f = k.slice(2); v = FOIL[f] || (f.replace(/-/g," ")+" reverse"); cls = f==="" ? "rv" : f==="masterball" ? "mb" : f==="energy" ? "en" : "pb"; }
-      cards.push({ no, lid, name, rar, v, cls, id: lid+"-"+k, img: img? img+"/low.webp":"", imgHi: img? img+"/high.webp":"" });
+      cards.push({ no: isNaN(no)?9999:no, disp: isNaN(no)?lid:pad(no), lid, name, rar, v, cls, id: lid+"-"+k, img: img? img+"/low.webp":"", imgHi: img? img+"/high.webp":"" });
     }
   }
   return cards;
@@ -268,6 +270,7 @@ function buildCards(id){
    ============================================================ */
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(3,"0");
+const dsp = c => c.disp || pad(c.no);
 const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
 SETS.forEach(s=>s.cards.forEach(c=>{ c.id=pad(c.no)+"-"+c.v.replace(/\W/g,"").toLowerCase(); c.imgHi=c.img; c.cls=c.cls==="sec"?"sec":c.cls; }));
 
@@ -413,23 +416,23 @@ function pageHTML(p, side){
   const cs = curCards(), own = owned(), fade = $("mode").value==="missing";
   if(p>=pages()) return `<div class="page blank ${side}">End of set</div>`;
   const slice = cs.slice(p*9,p*9+9);
-  let h = `<div class="page ${side}"><div class="pagehead"><span>Page ${p+1}</span><span>${pad(slice[0].no)}–${pad(slice[slice.length-1].no)}</span></div><div class="grid">`;
+  let h = `<div class="page ${side}"><div class="pagehead"><span>Page ${p+1}</span><span>${dsp(slice[0])}–${dsp(slice[slice.length-1])}</span></div><div class="grid">`;
   for(let k=0;k<9;k++){
     const i=p*9+k, c=cs[i];
     if(!c){ h+=`<div class="slot empty"></div>`; continue; }
     const o = own.has(c.id);
-    const inner = c.img ? `<img src="${esc(c.img)}" alt="" loading="lazy" onerror="imgFail(this,${i})">` : `<span class="fallback"><b>${pad(c.no)}</b>${esc(c.name)}<br>${esc(c.v)}</span>`;
+    const inner = c.img ? `<img src="${esc(c.img)}" alt="" loading="lazy" onerror="imgFail(this,${i})">` : `<span class="fallback"><b>${dsp(c)}</b>${esc(c.name)}<br>${esc(c.v)}</span>`;
     h += `<div class="slot ${o?"owned":""} ${hit===i?"hit":""}" style="${fade&&o?"opacity:.3":""}">
-      <button class="pocket" data-i="${i}" aria-pressed="${o}" title="${esc(c.name)} ${pad(c.no)} · ${esc(c.v)}" aria-label="${esc(c.name)} ${c.no}, ${esc(c.v)}">${inner}<span class="tick"></span></button>
+      <button class="pocket" data-i="${i}" aria-pressed="${o}" title="${esc(c.name)} ${dsp(c)} · ${esc(c.v)}" aria-label="${esc(c.name)} ${c.no}, ${esc(c.v)}">${inner}<span class="tick"></span></button>
       ${c.img?`<button class="zoom" data-z="${i}" aria-label="Enlarge ${esc(c.name)}">⤢</button>`:""}
-      <div class="label"><span class="vdot c-${c.cls||"n"}"></span><span class="no">${pad(c.no)}</span><span class="nm">${esc(c.name)} · ${esc(c.v)}</span></div>
+      <div class="label"><span class="vdot c-${c.cls||"n"}"></span><span class="no">${dsp(c)}</span><span class="nm">${esc(c.name)} · ${esc(c.v)}</span></div>
     </div>`;
   }
   return h + `</div></div>`;
 }
 function imgFail(img,i){
   const c = curCards()[i], f = document.createElement("span");
-  f.className="fallback"; f.innerHTML=`<b>${pad(c.no)}</b>${esc(c.name)}<br>${esc(c.v)}`;
+  f.className="fallback"; f.innerHTML=`<b>${dsp(c)}</b>${esc(c.name)}<br>${esc(c.v)}`;
   img.replaceWith(f);
 }
 function legendHTML(cs){
@@ -442,7 +445,7 @@ function renderSet(){
   const m = metaOf(setId), cs = curCards();
   $("settitle").textContent = m.title;
   const loc = SETS.find(s=>s.id===setId);
-  $("setmeta").textContent = loc ? loc.meta : `${m.code} · English · ${cache[setId]?cache[setId].official+" cards + secret rares":""}`;
+  $("setmeta").textContent = loc ? loc.meta : `${m.code} · English · ${cache[setId]?(cache[setId].official<cache[setId].rows.length?cache[setId].official+" cards + secret rares":cache[setId].rows.length+" cards"):""}`;
   document.title = m.title + " · Pokémon Binder";
   if(!cs.length){ $("binder").innerHTML=`<div class="loading" style="grid-column:1/-1">Loading cards from TCGdex…</div>`; $("legend").innerHTML=""; return; }
   spread = Math.max(0, Math.min(spread, maxSpread()));
@@ -467,7 +470,7 @@ function route(){
     if(id!==setId){ spread=0; hit=null; $("q").value=""; }
     setId = id; view = "set";
     const m = metaOf(id);
-    const jumps = m.local ? SETS.find(s=>s.id===id).jumps : (cache[id] ? [[1,"Main set"],[cache[id].official+1,"Secret rares"]] : []);
+    const jumps = m.local ? SETS.find(s=>s.id===id).jumps : (cache[id] ? (cache[id].official < cache[id].rows.length ? [[1,"Main set"],[cache[id].official+1,"Secret rares"]] : [[1,"Start"]]) : []);
     $("jump").innerHTML = `<option value="">Jump to…</option>` + jumps.map(([n,l])=>`<option value="${n}">${esc(l)}</option>`).join("");
     $("home").hidden = true; $("setview").hidden = false;
     if(!m.local && !cache[id]) fetchSet(id).then(()=>{ if(setId===id) route(); }).catch(()=>{ $("binder").innerHTML=`<div class="loading" style="grid-column:1/-1">Couldn't load this set from TCGdex. Check you're online and refresh.</div>`; });
@@ -482,7 +485,7 @@ addEventListener("hashchange", route);
 $("binder").addEventListener("click", e=>{
   const z = e.target.closest("[data-z]");
   if(z){ const c = curCards()[+z.dataset.z], lb = $("lightbox");
-    lb.innerHTML = `<figure><img src="${esc(c.imgHi)}" alt="${esc(c.name)}"><figcaption>${esc(c.name)}<small>${pad(c.no)} · ${esc(c.v)}${c.rar?" · "+esc(c.rar):""}</small></figcaption></figure>`;
+    lb.innerHTML = `<figure><img src="${esc(c.imgHi)}" alt="${esc(c.name)}"><figcaption>${esc(c.name)}<small>${dsp(c)} · ${esc(c.v)}${c.rar?" · "+esc(c.rar):""}</small></figcaption></figure>`;
     lb.hidden = false; return; }
   const p = e.target.closest(".pocket[data-i]"); if(!p) return;
   const c = curCards()[+p.dataset.i], list = new Set(progress.sets[setId]||[]);
