@@ -51,7 +51,13 @@ input[type=search]{flex:1 1 220px}
 
 /* summary */
 .series{display:flex;flex-direction:column;gap:12px;padding-top:8px}
-.serieshead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 24px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.serieshead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 24px;border-bottom:1px solid var(--line);padding-bottom:10px;cursor:pointer;list-style:none}
+.serieshead::-webkit-details-marker{display:none}
+.serieshead h2{display:flex;align-items:flex-end;gap:10px}
+.chev{display:inline-block;width:22px;height:22px;border-radius:6px;border:1px solid var(--line);position:relative;flex:none;margin-bottom:3px}
+.chev::after{content:"";position:absolute;left:7px;top:5px;width:6px;height:6px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .15s}
+details:not([open]) .chev::after{transform:rotate(-45deg);left:5px;top:7px}
+details.series[open] .serieshead{margin-bottom:4px}
 .tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
 .tile{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:12px;background:var(--tile);border:1px solid var(--line);text-decoration:none;cursor:pointer;transition:transform .12s,border-color .12s;min-width:0}
 .tile:hover{transform:translateY(-2px);border-color:var(--muted)}
@@ -123,7 +129,7 @@ input[type=search]{flex:1 1 220px}
   <!-- ===== summary ===== -->
   <section id="home" class="wrap" style="gap:28px">
     <div class="row">
-      <h1><span class="eyebrow">Monchow's collection</span>Pokémon Binder</h1>
+      <h1><span class="eyebrow">Monchow's collection · English TCG total</span>Pokémon Binder</h1>
       <div class="stats"><div class="count" id="allcount"></div><div class="bar"><i id="allbar"></i></div><div class="count" id="allpct"></div></div>
     </div>
     <div id="serieslist" class="wrap" style="gap:32px"></div>
@@ -402,6 +408,9 @@ function stat(id){
 
 /* ---------- summary page ---------- */
 const pct = (a,b) => b ? Math.round(a/b*1000)/10 : 0;
+let openSeries = null;
+try{ openSeries = JSON.parse(localStorage.getItem("pkmn-binder-open")); }catch(e){}
+if(!openSeries) openSeries = { [SERIES[0].id]: true };
 function renderHome(){
   let gOwn=0, gTot=0;
   $("serieslist").innerHTML = SERIES.map(sr=>{
@@ -418,11 +427,11 @@ function renderHome(){
         <div class="sub">${st?`${st.own} / ${st.total} collected`:"Loading cards…"}</div>
       </a>`;
     }).join("");
-    gOwn+=sOwn; gTot+=sTot;
+    if(sr.id!=="special"){ gOwn+=sOwn; gTot+=sTot; }
     const sp = pct(sOwn,sTot);
-    return `<section class="series"><div class="serieshead"><h2><span class="eyebrow">${esc(sr.eyebrow)}</span>${esc(sr.title)}</h2>
-      <div class="stats"><div class="count">${sOwn}<span>/${sTot}${pending?"+":""}</span></div><div class="bar"><i style="width:${sp}%"></i></div><div class="count">${sp}%</div></div></div>
-      <div class="tiles">${tiles}</div></section>`;
+    return `<details class="series" data-sr="${sr.id}" ${openSeries[sr.id]?"open":""}><summary class="serieshead"><h2><span class="chev" aria-hidden="true"></span><span><span class="eyebrow">${esc(sr.eyebrow)} · ${sr.sets.length} set${sr.sets.length>1?"s":""}</span>${esc(sr.title)}</span></h2>
+      <div class="stats"><div class="count">${sOwn}<span>/${sTot}${pending?"+":""}</span></div><div class="bar"><i style="width:${sp}%"></i></div><div class="count">${sp}%</div></div></summary>
+      <div class="tiles">${tiles}</div></details>`;
   }).join("");
   const gp = pct(gOwn,gTot);
   $("allcount").innerHTML = `${gOwn}<span>/${gTot}</span>`; $("allpct").textContent = gp+"%"; $("allbar").style.width = gp+"%";
@@ -508,6 +517,7 @@ function route(){
   }
 }
 addEventListener("hashchange", route);
+document.addEventListener("toggle", e=>{ const d=e.target; if(!d.matches || !d.matches("details.series")) return; openSeries[d.dataset.sr]=d.open; try{ localStorage.setItem("pkmn-binder-open", JSON.stringify(openSeries)); }catch(err){} }, true);
 
 /* ---------- events ---------- */
 $("binder").addEventListener("click", e=>{
