@@ -701,7 +701,11 @@ function wishCount(){
 function wishBadge(){ const n=wishCount(); document.querySelectorAll(".wishn").forEach(el=>el.textContent=n||""); }
 
 /* ---------- set logos: subsets use their main set's logo, then TCGdex, then pkmn.gg ---------- */
-let logoGood = {}; try{ logoGood = JSON.parse(localStorage.getItem("pkmn-binder-logos")) || {}; }catch(e){}
+let logoGood = {}, logoBad = {};   // per set: the logo address that worked; per address: when it last failed (rechecked weekly)
+try{ logoGood = JSON.parse(localStorage.getItem("pkmn-binder-logos")) || {}; }catch(e){}
+try{ logoBad = JSON.parse(localStorage.getItem("pkmn-binder-logos-bad")) || {}; }catch(e){}
+for(const [u,t] of Object.entries(logoBad)) if(Date.now()-t > 7*864e5) delete logoBad[u];
+const saveLogos = () => { try{ localStorage.setItem("pkmn-binder-logos", JSON.stringify(logoGood)); localStorage.setItem("pkmn-binder-logos-bad", JSON.stringify(logoBad)); }catch(e){} };
 function logoList(m, seen){
   seen = seen || new Set(); if(!m || seen.has(m.id)) return []; seen.add(m.id);
   const base = (cache[m.id]&&cache[m.id].logo) || `https://assets.tcgdex.net/en/${seriesOf(m.id)}/${m.id}/logo`;
@@ -712,12 +716,15 @@ function logoList(m, seen){
 function logoHTML(m){
   let list = logoList(m); const good = logoGood[m.id];
   if(good && list.includes(good)) list = [good, ...list.filter(u=>u!==good)];
+  else list = list.filter(u=>!logoBad[u]);
+  if(!list.length) return `<span class="alt">${esc(m.title)}</span>`;
   return `<img src="${esc(list[0])}" data-set="${esc(m.id)}" data-alt="${esc(list.slice(1).join("|"))}" alt="${esc(m.title)}" loading="lazy" onload="logoLoad(this)" onerror="logoFail(this)">`;
 }
-function logoLoad(img){ const id = img.dataset.set; if(logoGood[id]!==img.src){ logoGood[id] = img.src; try{ localStorage.setItem("pkmn-binder-logos", JSON.stringify(logoGood)); }catch(e){} } }
+function logoLoad(img){ const id = img.dataset.set; if(logoGood[id]!==img.src){ logoGood[id] = img.src; saveLogos(); } }
 function logoFail(img){
-  const rest = (img.dataset.alt||"").split("|").filter(Boolean);
-  if(logoGood[img.dataset.set]===img.src){ delete logoGood[img.dataset.set]; }
+  const rest = (img.dataset.alt||"").split("|").filter(u=>u && !logoBad[u]);
+  if(logoGood[img.dataset.set]===img.src) delete logoGood[img.dataset.set];
+  logoBad[img.src] = Date.now(); saveLogos();
   if(rest.length){ img.dataset.alt = rest.slice(1).join("|"); img.src = rest[0]; return; }
   const t = document.createElement("span"); t.className = "alt"; t.textContent = img.alt; img.replaceWith(t);
 }
