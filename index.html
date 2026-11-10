@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Pokémon Binder</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: two-page binder spread (3x3 pockets per page) on a desk surface; one page on narrow screens */
+:root{
+  --desk:#e7e9ee; --page:#f8f9fb; --pocket:#ffffff; --line:#d3d7df; --ink:#1b1e27; --muted:#626a7a;
+  --spine:#2a3142; --accent:#d93a3a; --pb:#d93a3a; --mb:#7a4bd1; --gold:#b8860b; --own:#1f8f5a; --warnbg:#fff4d6; --warn:#7a5a00;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"Inter",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){:root{
+  --desk:#12141a; --page:#1b1f29; --pocket:#232836; --line:#343b4c; --ink:#e9ecf3; --muted:#9aa3b5;
+  --spine:#0b0d12; --accent:#ff6262; --pb:#ff6b6b; --mb:#b08cff; --gold:#e5b94a; --own:#4cd18f; --warnbg:#3a3017; --warn:#f2d27a; color-scheme:dark}}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--desk);color:var(--ink);font-family:var(--body);font-size:14px;padding:20px 16px 40px}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,3.5vw,2.3rem);margin:0;letter-spacing:-.01em}
+h1 small{display:block;font-family:var(--mono);font-size:.72rem;font-weight:500;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.stats{display:flex;align-items:center;gap:14px;font-variant-numeric:tabular-nums}
+.count{font-family:var(--mono);font-weight:700;font-size:1.1rem}
+.count span{color:var(--muted);font-weight:500;font-size:.85rem}
+.bar{width:180px;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--own);width:0;transition:width .3s}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+input[type=search],select{font:inherit;color:var(--ink);background:var(--pocket);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+input[type=search]{flex:1 1 220px}
+button{font:inherit;font-weight:600;color:var(--ink);background:var(--pocket);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
+button:hover{border-color:var(--muted)}
+button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.primary{background:var(--ink);color:var(--page);border-color:var(--ink)}
+button:disabled{opacity:.4;cursor:default}
+.sync{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-radius:10px;background:var(--pocket);border:1px solid var(--line);font-size:13px}
+.sync.warn{background:var(--warnbg);color:var(--warn);border-color:transparent}
+.sync .dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}
+.sync.ok .dot{background:var(--own)}
+.sync .grow{flex:1 1 200px}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
+.legend b{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.binder{display:grid;grid-template-columns:1fr 22px 1fr;background:var(--spine);border-radius:14px;padding:14px}
+.spine{background:repeating-linear-gradient(var(--spine) 0 30px,#ffffff10 30px 34px)}
+.page{background:var(--page);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.page.blank{align-items:center;justify-content:center;color:var(--muted);font-family:var(--mono);font-size:12px}
+.pagehead{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.slot{position:relative;display:flex;flex-direction:column;gap:5px;min-width:0}
+.pocket{position:relative;aspect-ratio:63/88;max-width:100%;border-radius:7px;overflow:hidden;background:var(--pocket);
+  border:1px dashed var(--line);cursor:pointer;padding:0;display:block;width:100%;transition:transform .12s}
+.pocket:hover{transform:translateY(-2px)}
+.pocket img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1);opacity:.38;transition:filter .2s,opacity .2s}
+.slot.owned .pocket{border:2px solid var(--own)}
+.slot.owned .pocket img{filter:none;opacity:1}
+.pocket .fallback{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;padding:8px;text-align:center;font-family:var(--display);font-weight:600;font-size:.9rem;color:var(--muted)}
+.pocket .fallback b{font-family:var(--mono);font-size:1.3rem;color:var(--ink)}
+.tick{position:absolute;right:6px;bottom:6px;width:22px;height:22px;border-radius:6px;border:2px solid #fff;background:#0006;display:grid;place-items:center}
+.slot.owned .tick{background:var(--own);border-color:var(--own)}
+.slot.owned .tick::after{content:"";width:9px;height:5px;border:2.5px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.zoom{position:absolute;left:6px;top:6px;width:26px;height:26px;padding:0;border-radius:6px;border:0;background:#000a;color:#fff;font-size:14px;line-height:26px;opacity:0;transition:opacity .15s}
+.slot:hover .zoom,.zoom:focus-visible{opacity:1}
+.label{display:flex;align-items:center;gap:5px;font-size:11px;min-width:0}
+.label .no{font-family:var(--mono);font-weight:700;font-variant-numeric:tabular-nums}
+.label .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);flex:1;min-width:0}
+.vdot{width:8px;height:8px;border-radius:2px;flex:none;border:1px solid var(--line)}
+.vdot.pb{background:var(--pb);border-color:var(--pb)} .vdot.mb{background:var(--mb);border-color:var(--mb)} .vdot.sec{background:var(--gold);border-color:var(--gold)}
+.slot.hit .pocket{box-shadow:0 0 0 3px var(--accent)}
+.slot.empty{visibility:hidden}
+.nav{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
+.nav .where{font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.lightbox{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;padding:24px;z-index:20}
+.lightbox figure{margin:0;display:flex;flex-direction:column;gap:10px;align-items:center;color:#fff;max-height:100%}
+.lightbox img{max-height:78vh;max-width:90vw;border-radius:12px}
+.lightbox figcaption{font-family:var(--display);font-size:1.1rem;text-align:center}
+.lightbox figcaption small{display:block;font-family:var(--mono);font-size:.75rem;opacity:.75;margin-top:2px}
+.note{font-size:12px;color:var(--muted)}
+@media (max-width:760px){.binder{grid-template-columns:1fr;padding:8px}.spine,.page.right{display:none}.grid{gap:7px}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><small id="setmeta"></small><span id="settitle"></span></h1>
+    <div class="stats"><div class="count" id="count"></div><div class="bar"><i id="bar"></i></div><div class="count" id="pct"></div></div>
+  </header>
+
+  <div class="sync" id="sync"><span class="dot"></span><span class="grow" id="syncmsg"></span><span id="syncbtns"></span></div>
+
+  <div class="tools">
+    <select id="set" aria-label="Choose set"></select>
+    <input type="search" id="q" placeholder="Find a card: name or number, e.g. Gengar or 094">
+    <select id="jump" aria-label="Jump to section"></select>
+    <select id="mode" aria-label="Show">
+      <option value="all">Show every pocket</option>
+      <option value="missing">Fade what I own</option>
+    </select>
+  </div>
+  <div class="legend">
+    <span><b style="background:var(--pocket);border:1px solid var(--line)"></b>Normal</span>
+    <span><b style="background:var(--pb)"></b>Poké Ball reverse</span>
+    <span><b style="background:var(--mb)"></b>Master Ball reverse</span>
+    <span><b style="background:var(--gold)"></b>Secret rare</span>
+    <span>Click a card to mark it collected · ← → to turn pages</span>
+  </div>
+
+  <div class="binder" id="binder"></div>
+
+  <div class="nav">
+    <button id="prev">← Previous</button>
+    <span class="where" id="where"></span>
+    <button id="next" class="primary">Next →</button>
+  </div>
+  <p class="note">Card images load from Bill's Archive (billsarchive.com). Missing cards show greyed out; collected cards show in full colour.</p>
+</div>
+
+<div class="lightbox" id="lightbox" hidden></div>
+
+<script>
+/* ============================================================
+   SETS — add a new set by adding another entry to this list.
+   Each card: {no, name, rar, v (variant label), cls ("", "pb", "mb", "sec"), img}
+   ============================================================ */
+const IMG = "https://bills-archive.nyc3.cdn.digitaloceanspaces.com/cn_cards/";
+const SETS = [];
+
+/* ---------- Collect 151 (Simplified Chinese, 151C) ---------- */
+(function(){
+  // dex order: "<code> <image slug>" for 001–151
+  const CODES = "p001 bulbasaur|p002 ivysaur|y1180 venusaur-ex|p004 charmander|p005 charmeleon|y1181 charizard-ex|p007 squirtle|p008 wartortle|y1182 blastoise-ex|p010 caterpie|p011 metapod|p012 butterfree|p013 weedle|p014 kakuna|p015 beedrill|p016 pidgey|p017 pidgeotto|p018 pidgeot|p0019 rattata|p0020 raticate|p021 spearow|p022 fearow|p023 ekans|y1183 arbok-ex|p025 pikachu|p026 raichu|y890 sandshrew|y891 sandslash|p029 nidoran|p030 nidorina|p031 nidoqueen|p032 nidoran|p033 nidorino|p034 nidoking|p035 clefairy|p036 clefable|y393 vulpix|y1184 ninetales-ex|p039 jigglypuff|y1185 wigglytuff-ex|p041 zubat|p042 golbat|p043 oddish|p044 gloom|p045 vileplume|p046 paras|p047 parasect|p048 venonat|p049 venomoth|y395 diglett|y396 dugtrio|y397 meowth|y398 persian|p054 psyduck|p055 golduck|p056 mankey|p057 primeape|p058 growlithe|p059 arcanine|p060 poliwag|p061 poliwhirl|p062 poliwrath|p0063 abra|p0064 kadabra|y1186 alakazam-ex|p066 machop|p067 machoke|p068 machamp|p069 bellsprout|p070 weepinbell|p071 victreebel|p072 tentacool|p073 tentacruel|y399 geodude|y400 graveler|y1187 golem-ex|p077 ponyta|p078 rapidash|p079 slowpoke|p080 slowbro|p081 magnemite|p082 magneton|p083 farfetchd|p084 doduo|p085 dodrio|p086 seel|p087 dewgong|y539 grimer|y540 muk|p090 shellder|p091 cloyster|p092 gastly|p093 haunter|p094 gengar|p095 onix|p096 drowzee|p097 hypno|p098 krabby|p099 kingler|p100 voltorb|p101 electrode|p102 exeggcute|y402 exeggutor|p104 cubone|y712 marowak|p106 hitmonlee|p107 hitmonchan|p108 lickitung|p109 koffing|p110 weezing|p111 rhyhorn|p112 rhydon|p113 chansey|p114 tangela|y1188 kangaskhan-ex|p116 horsea|p117 seadra|p118 goldeen|p119 seaking|p120 staryu|p121 starmie|p122 mr-mime|p123 scyther|y1189 jynx-ex|p125 electabuzz|p126 magmar|p127 pinsir|p128 tauros|p129 magikarp|p130 gyarados|p131 lapras|y1074 ditto|p133 eevee|p134 vaporeon|p135 jolteon|p136 flareon|p137 porygon|y1218 omanyte|y1219 omastar|p1220 kabuto|p141 kabutops|y1221 aerodactyl|p143 snorlax|p144 articuno|y1190 zapdos-ex|p146 moltres|p147 dratini|p148 dragonair|p149 dragonite|p150 mewtwo|y1191 mew-ex".split("|");
+  const NAMES = "Bulbasaur,Ivysaur,Venusaur ex,Charmander,Charmeleon,Charizard ex,Squirtle,Wartortle,Blastoise ex,Caterpie,Metapod,Butterfree,Weedle,Kakuna,Beedrill,Pidgey,Pidgeotto,Pidgeot,Rattata,Raticate,Spearow,Fearow,Ekans,Arbok ex,Pikachu,Raichu,Sandshrew,Sandslash,Nidoran♀,Nidorina,Nidoqueen,Nidoran♂,Nidorino,Nidoking,Clefairy,Clefable,Vulpix,Ninetales ex,Jigglypuff,Wigglytuff ex,Zubat,Golbat,Oddish,Gloom,Vileplume,Paras,Parasect,Venonat,Venomoth,Diglett,Dugtrio,Meowth,Persian,Psyduck,Golduck,Mankey,Primeape,Growlithe,Arcanine,Poliwag,Poliwhirl,Poliwrath,Abra,Kadabra,Alakazam ex,Machop,Machoke,Machamp,Bellsprout,Weepinbell,Victreebel,Tentacool,Tentacruel,Geodude,Graveler,Golem ex,Ponyta,Rapidash,Slowpoke,Slowbro,Magnemite,Magneton,Farfetch'd,Doduo,Dodrio,Seel,Dewgong,Grimer,Muk,Shellder,Cloyster,Gastly,Haunter,Gengar,Onix,Drowzee,Hypno,Krabby,Kingler,Voltorb,Electrode,Exeggcute,Exeggutor,Cubone,Marowak,Hitmonlee,Hitmonchan,Lickitung,Koffing,Weezing,Rhyhorn,Rhydon,Chansey,Tangela,Kangaskhan ex,Horsea,Seadra,Goldeen,Seaking,Staryu,Starmie,Mr. Mime,Scyther,Jynx ex,Electabuzz,Magmar,Pinsir,Tauros,Magikarp,Gyarados,Lapras,Ditto,Eevee,Vaporeon,Jolteon,Flareon,Porygon,Omanyte,Omastar,Kabuto,Kabutops,Aerodactyl,Snorlax,Articuno,Zapdos ex,Moltres,Dratini,Dragonair,Dragonite,Mewtwo,Mew ex".split(",");
+  const RAR = "CUDCUDCUDCCUCCRCCUCUCUCDCRCUCUUCURCUCDCDCUCURCUCUCUCUCUCUCUCCUCUDCURCCUCUCUDCUCUCUCCRCUCUCUCURUCUCUCRCUCRUUCCRCURCDCUCUCRRUDCCUUCRURCRRRCURURRURDRCURRD";
+  const RN = {C:"C",U:"U",R:"R",D:"RR"};
+  const url = (no, ver, pack) => { const [code, slug] = CODES[no-1].split(" "); const p = pack || "151c"; return `${IMG}${p}/${p}-${code}_${slug}${ver>1?"-"+ver:""}.webp`; };
+  const cards = [];
+  NAMES.forEach((n,i)=>{ const no=i+1, r=RN[RAR[i]];
+    cards.push({no,name:n,rar:r,v:"Normal",cls:"",img:url(no,1)});
+    if(r!=="RR"){
+      cards.push({no,name:n,rar:r,v:"Poké Ball",cls:"pb",img:url(no,2)});
+      cards.push({no,name:n,rar:r,v:"Master Ball",cls:"mb",img:url(no,3)});
+    }
+  });
+  const sec = (no,name,rar,v,img) => cards.push({no,name,rar,v,cls:"sec",img});
+  [4,16,17,26,39,43,44,45,63,64,84,85,100,101,120,121,132,143].forEach((d,i)=>sec(152+i,NAMES[d-1],"S","Shiny rare",url(d,4)));
+  [["Journey","151c1"],["Hope","151c2"],["Surprise","151c3"],["Gathering","151c4"]].forEach(([p,pk],i)=>sec(170+i,"Pikachu","AR",p+" AR",url(25,1,pk)));
+  [3,6,9,24,38,40,65,76,115,124,145,151].forEach((d,i)=>sec(174+i,NAMES[d-1],"SR","SR",url(d,2)));
+  [40,65,151].forEach((d,i)=>sec(186+i,NAMES[d-1],"SSR","Shiny SR",url(d,3)));
+  sec(189,"Alakazam ex","SAR","Surprise SAR",url(65,1,"151c3"));
+  sec(190,"Zapdos ex","SAR","Gathering SAR",url(145,1,"151c4"));
+  sec(191,"Mew ex","SAR","Surprise SAR",url(151,1,"151c3"));
+  sec(192,"Mew ex","UR","UR",url(151,4));
+  SETS.push({
+    id:"c151", title:"Collect 151", meta:"151C · Simplified Chinese · Master set", outOf:151,
+    jumps:[[1,"001–151 main set"],[152,"152 Shiny rares"],[170,"170 Pikachu ARs"],[174,"174 ex SR"],[186,"186 Shiny SR"],[189,"189 SAR & UR"]],
+    cards
+  });
+})();
+
+/* ---------- add the next set below this line ---------- */
+
+/* ============================================================
+   App
+   ============================================================ */
+SETS.forEach(s=>s.cards.forEach(c=>c.id=String(c.no).padStart(3,"0")+"-"+c.v.replace(/\W/g,"").toLowerCase()));
+const $ = id => document.getElementById(id);
+const pad = n => String(n).padStart(3,"0");
+const esc = s => s.replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+
+let progress = {version:1, sets:{}, updated:null};
+let setId = SETS[0].id, spread = 0, hit = null;
+const LS = "pkmn-binder-progress", LSV = "pkmn-binder-view";
+try{ const p = JSON.parse(localStorage.getItem(LS)); if(p && p.sets) progress = p; }catch(e){}
+try{ const v = JSON.parse(localStorage.getItem(LSV)); if(v){ if(SETS.some(s=>s.id===v.setId)) setId=v.setId; spread=v.spread||0; } }catch(e){}
+
+const set = () => SETS.find(s=>s.id===setId);
+const owned = () => new Set(progress.sets[setId] || []);
+const perView = () => matchMedia("(max-width:760px)").matches ? 1 : 2;
+const pages = () => Math.ceil(set().cards.length/9);
+const maxSpread = () => Math.ceil(pages()/perView())-1;
+
+/* ---------- sync via a private GitHub gist (works on PCs and phone) ---------- */
+const GH="https://api.github.com", GDESC="Pokemon Binder progress", GFILE="binder-progress.json";
+let gh={token:null,gist:null}, syncState="off"; // off | ok | saving | error
+try{ const g=JSON.parse(localStorage.getItem("pkmn-binder-gh")); if(g&&g.token) gh=g; }catch(e){}
+const saveGh=()=>{ try{ localStorage.setItem("pkmn-binder-gh",JSON.stringify(gh)); }catch(e){} };
+async function api(path,opts={}){
+  const r=await fetch(GH+path,{...opts,headers:{"Authorization":"Bearer "+gh.token,"Accept":"application/vnd.github+json",...(opts.body?{"Content-Type":"application/json"}:{})}});
+  if(!r.ok){ const e=new Error(r.status); e.status=r.status; throw e; }
+  return r.status===204?null:r.json();
+}
+async function findOrCreateGist(){
+  for(let page=1;page<=5;page++){
+    const list=await api(`/gists?per_page=100&page=${page}`);
+    const g=list.find(x=>x.description===GDESC && x.files[GFILE]);
+    if(g) return g.id;
+    if(list.length<100) break;
+  }
+  const g=await api("/gists",{method:"POST",body:JSON.stringify({description:GDESC,public:false,files:{[GFILE]:{content:JSON.stringify(progress,null,1)}}})});
+  return g.id;
+}
+async function pull(){
+  const g=await api("/gists/"+gh.gist), f=g.files[GFILE];
+  if(!f) return;
+  let txt=f.content;
+  if(f.truncated) txt=await (await fetch(f.raw_url)).text();
+  const remote=JSON.parse(txt);
+  if(remote && remote.sets && (!progress.updated || (remote.updated||"")>=progress.updated)){ progress=remote; saveLocal(); }
+  else if(progress.updated && (remote.updated||"")<progress.updated){ push(); }
+}
+let pushTimer=null;
+function push(){
+  if(!gh.token||!gh.gist) return;
+  clearTimeout(pushTimer); syncState="saving"; syncUI();
+  pushTimer=setTimeout(async()=>{
+    try{ await api("/gists/"+gh.gist,{method:"PATCH",body:JSON.stringify({files:{[GFILE]:{content:JSON.stringify(progress,null,1)}}})}); syncState="ok"; }
+    catch(e){ syncState="error"; }
+    syncUI();
+  },800);
+}
+const writeToFile=push;
+async function connect(token){
+  gh={token:token.trim(),gist:null};
+  try{ gh.gist=await findOrCreateGist(); saveGh(); await pull(); syncState="ok"; render(); }
+  catch(e){ gh={token:null,gist:null}; syncState="off"; flash(e.status===401?"GitHub didn't accept that key. Check you copied all of it and that it has Gists read and write access.":"Couldn't reach GitHub. Check you're online and try again."); return; }
+  syncUI();
+}
+async function initFile(){
+  if(!gh.token){ syncUI(); return; }
+  try{ if(!gh.gist){ gh.gist=await findOrCreateGist(); saveGh(); } await pull(); syncState="ok"; render(); }
+  catch(e){ syncState="error"; }
+  syncUI();
+}
+function exportFile(){
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(progress,null,1)],{type:"application/json"}));
+  a.download="binder-progress.json"; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+}
+function importFile(){
+  const i=document.createElement("input"); i.type="file"; i.accept=".json,application/json";
+  i.onchange=async()=>{ try{ const p=JSON.parse(await i.files[0].text()); if(!p.sets) throw 0; progress=p; progress.updated=new Date().toISOString(); saveLocal(); push(); render(); flash("Progress loaded"); }catch(e){ flash("That file isn't a binder progress file."); } };
+  i.click();
+}
+let flashTimer=null;
+function flash(t){ $("syncmsg").textContent=t; clearTimeout(flashTimer); flashTimer=setTimeout(syncUI,4000); }
+function syncUI(){
+  const box=$("sync"), msg=$("syncmsg"), btns=$("syncbtns");
+  box.className="sync"; btns.innerHTML="";
+  const b=(label,fn,primary)=>{ const el=document.createElement("button"); el.textContent=label; if(primary) el.className="primary"; el.onclick=fn; btns.appendChild(el); btns.append(" "); };
+  if(gh.token && syncState!=="error"){
+    box.classList.add("ok");
+    msg.textContent = syncState==="saving" ? "Saving to GitHub…" : "Synced with GitHub. Ticks show up on your other devices next time you open the binder.";
+    b("Sync now", async()=>{ try{ await pull(); render(); flash("Up to date"); }catch(e){ flash("Couldn't reach GitHub."); } });
+    b("Disconnect", ()=>{ gh={token:null,gist:null}; saveGh(); syncState="off"; syncUI(); });
+  } else if(gh.token){
+    box.classList.add("warn");
+    msg.textContent="Couldn't save to GitHub. Your ticks are safe on this device; try again when you're online.";
+    b("Try again", initFile, true);
+  } else {
+    box.classList.add("warn");
+    msg.innerHTML=`Ticks are only saved on this device. Paste your GitHub key to sync your PCs and phone. <input type="password" id="tok" placeholder="github_pat_…" style="font:inherit;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--pocket);color:var(--ink);width:min(260px,100%)">`;
+    b("Connect", ()=>{ const t=$("tok").value; if(t.trim()) connect(t); else flash("Paste your GitHub key first."); }, true);
+    b("Save backup", exportFile); b("Load backup", importFile);
+  }
+}
+function saveLocal(){ try{ localStorage.setItem(LS, JSON.stringify(progress)); }catch(e){} }
+function saveView(){ try{ localStorage.setItem(LSV, JSON.stringify({setId,spread})); }catch(e){} }
+
+/* ---------- rendering ---------- */
+function pageHTML(p, side){
+  const s=set(), own=owned(), fade=$("mode").value==="missing";
+  if(p>=pages()) return `<div class="page blank ${side}">End of set</div>`;
+  const slice=s.cards.slice(p*9,p*9+9);
+  let h=`<div class="page ${side}"><div class="pagehead"><span>Page ${p+1}</span><span>${pad(slice[0].no)}–${pad(slice[slice.length-1].no)}</span></div><div class="grid">`;
+  for(let k=0;k<9;k++){
+    const i=p*9+k, c=s.cards[i];
+    if(!c){ h+=`<div class="slot empty"></div>`; continue; }
+    const o=own.has(c.id);
+    h+=`<div class="slot ${o?"owned":""} ${hit===i?"hit":""}" style="${fade&&o?"opacity:.3":""}">
+      <button class="pocket" data-i="${i}" aria-pressed="${o}" title="${esc(c.name)} ${pad(c.no)}/${s.outOf} · ${esc(c.v)}" aria-label="${esc(c.name)} ${c.no}, ${esc(c.v)}">
+        <img src="${c.img}" alt="" loading="lazy" onerror="imgFail(this,${i})">
+        <span class="tick"></span>
+      </button>
+      <button class="zoom" data-z="${i}" aria-label="Enlarge ${esc(c.name)}">⤢</button>
+      <div class="label"><span class="vdot ${c.cls}"></span><span class="no">${pad(c.no)}</span><span class="nm">${esc(c.name)} · ${esc(c.v)}</span></div>
+    </div>`;
+  }
+  return h+`</div></div>`;
+}
+function imgFail(img,i){
+  const c=set().cards[i], f=document.createElement("span");
+  f.className="fallback"; f.innerHTML=`<b>${pad(c.no)}</b>${esc(c.name)}<br>${esc(c.v)}`;
+  img.replaceWith(f);
+}
+function render(){
+  const s=set();
+  spread=Math.max(0,Math.min(spread,maxSpread()));
+  $("settitle").textContent=s.title; $("setmeta").textContent=s.meta; document.title=s.title+" · Pokémon Binder";
+  const b=$("binder");
+  if(perView()===2){ const L=spread*2; b.innerHTML=pageHTML(L,"left")+`<div class="spine"></div>`+pageHTML(L+1,"right"); }
+  else b.innerHTML=pageHTML(spread,"left");
+  const first=spread*perView()+1, last=Math.min(pages(), first+perView()-1);
+  $("where").textContent=(first===last?`Page ${first}`:`Pages ${first}–${last}`)+` of ${pages()}`;
+  $("prev").disabled=spread===0; $("next").disabled=spread>=maxSpread();
+  const n=owned().size, total=s.cards.length, pc=Math.round(n/total*1000)/10;
+  $("count").innerHTML=`${n}<span>/${total}</span>`; $("pct").textContent=pc+"%"; $("bar").style.width=pc+"%";
+  saveView();
+}
+function fillSetControls(){
+  $("set").innerHTML=SETS.map(s=>`<option value="${s.id}">${esc(s.title)}</option>`).join("");
+  $("set").value=setId;
+  $("jump").innerHTML=`<option value="">Jump to…</option>`+set().jumps.map(([n,l])=>`<option value="${n}">${esc(l)}</option>`).join("");
+}
+function goTo(i){ spread=Math.floor(Math.floor(i/9)/perView()); hit=i; render(); }
+
+/* ---------- events ---------- */
+$("binder").addEventListener("click",e=>{
+  const z=e.target.closest("[data-z]");
+  if(z){ const c=set().cards[+z.dataset.z]; const lb=$("lightbox");
+    lb.innerHTML=`<figure><img src="${c.img}" alt="${esc(c.name)}"><figcaption>${esc(c.name)}<small>${pad(c.no)}/${set().outOf} · ${esc(c.v)} · ${esc(c.rar)}</small></figcaption></figure>`;
+    lb.hidden=false; return; }
+  const p=e.target.closest(".pocket[data-i]"); if(!p) return;
+  const c=set().cards[+p.dataset.i], list=new Set(progress.sets[setId]||[]);
+  list.has(c.id)?list.delete(c.id):list.add(c.id);
+  progress.sets[setId]=[...list]; progress.updated=new Date().toISOString();
+  saveLocal(); writeToFile(); hit=null; render();
+  document.querySelector(`.pocket[data-i="${p.dataset.i}"]`)?.focus();
+});
+$("lightbox").onclick=()=>{ $("lightbox").hidden=true; };
+$("prev").onclick=()=>{ spread--; hit=null; render(); };
+$("next").onclick=()=>{ spread++; hit=null; render(); };
+document.addEventListener("keydown",e=>{
+  if(e.key==="Escape") $("lightbox").hidden=true;
+  if(e.target.matches("input,textarea,select")) return;
+  if(e.key==="ArrowRight"&&spread<maxSpread()){ spread++; hit=null; render(); }
+  if(e.key==="ArrowLeft"&&spread>0){ spread--; hit=null; render(); }
+});
+$("q").addEventListener("input",e=>{
+  const q=e.target.value.trim().toLowerCase(); if(!q){ hit=null; render(); return; }
+  const cs=set().cards, i=/^\d+$/.test(q)?cs.findIndex(c=>c.no===+q):cs.findIndex(c=>c.name.toLowerCase().includes(q));
+  if(i>=0) goTo(i);
+});
+$("jump").addEventListener("change",e=>{ const n=+e.target.value; if(n) goTo(set().cards.findIndex(c=>c.no===n)); e.target.value=""; });
+$("set").addEventListener("change",e=>{ setId=e.target.value; spread=0; hit=null; fillSetControls(); render(); });
+$("mode").addEventListener("change",render);
+let lastView=perView();
+addEventListener("resize",()=>{ if(perView()!==lastView){ const p=spread*lastView; lastView=perView(); spread=Math.floor(p/lastView); render(); } });
+document.addEventListener("visibilitychange",async()=>{ if(!document.hidden && gh.token && syncState==="ok"){ try{ await pull(); render(); }catch(e){} } });
+
+fillSetControls(); render(); initFile();
+</script>
+</body>
+</html>
