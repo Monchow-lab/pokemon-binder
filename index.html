@@ -241,7 +241,7 @@ const SERIES = [
   { id:"me", title:"Mega Evolution", eyebrow:"English TCG", sets:[
     {id:"me06",   title:"Delta Reign",                     code:"DLR",  date:"2026-11-06"},
     {id:"30th",   title:"30th Celebration",                code:"30C",  date:"2026-09-16"},
-    {id:"30th-c", title:"30th Anniversary: Classic Collection", code:"30CC", date:"2026-09-16", logo:"https://assets.tcgdex.net/en/me/30th/logo"},
+    {id:"30th-c", title:"30th Anniversary: Classic Collection", code:"30CC", date:"2026-09-16", parent:"30th"},
     {id:"me05",   title:"Pitch Black",                     code:"PBL",  date:"2026-07-17"},
     {id:"me04",   title:"Chaos Rising",                    code:"CRI",  date:"2026-05-22"},
     {id:"me03",   title:"Perfect Order",                   code:"POR",  date:"2026-03-27"},
@@ -272,24 +272,24 @@ const SERIES = [
     {id:"sve",     title:"Scarlet & Violet Energy", code:"SVE", date:"2023-03-31"},
   ]},
   { id:"swsh", title:"Sword & Shield", eyebrow:"English TCG", sets:[
-    {id:"swsh12.5gg", title:"Crown Zenith Galarian Gallery", code:"CRZ-GG", date:"2023-01-20"},
+    {id:"swsh12.5gg", title:"Crown Zenith Galarian Gallery", code:"CRZ-GG", date:"2023-01-20", parent:"swsh12.5"},
     {id:"swsh12.5", title:"Crown Zenith", code:"CRZ", date:"2023-01-20"},
-    {id:"swsh12tg", title:"Silver Tempest Trainer Gallery", code:"SIT-TG", date:"2022-11-11"},
+    {id:"swsh12tg", title:"Silver Tempest Trainer Gallery", code:"SIT-TG", date:"2022-11-11", parent:"swsh12"},
     {id:"swsh12", title:"Silver Tempest", code:"SIT", date:"2022-11-11"},
-    {id:"swsh11tg", title:"Lost Origin Trainer Gallery", code:"LOR-TG", date:"2022-09-09"},
+    {id:"swsh11tg", title:"Lost Origin Trainer Gallery", code:"LOR-TG", date:"2022-09-09", parent:"swsh11"},
     {id:"swsh11", title:"Lost Origin", code:"LOR", date:"2022-09-09"},
     {id:"swsh10.5", title:"Pokémon GO", code:"PGO", date:"2022-07-01"},
-    {id:"swsh10tg", title:"Astral Radiance Trainer Gallery", code:"ASR-TG", date:"2022-05-27"},
+    {id:"swsh10tg", title:"Astral Radiance Trainer Gallery", code:"ASR-TG", date:"2022-05-27", parent:"swsh10"},
     {id:"swsh10", title:"Astral Radiance", code:"ASR", date:"2022-05-27"},
-    {id:"swsh9tg", title:"Brilliant Stars Trainer Gallery", code:"BRS-TG", date:"2022-02-25"},
+    {id:"swsh9tg", title:"Brilliant Stars Trainer Gallery", code:"BRS-TG", date:"2022-02-25", parent:"swsh9"},
     {id:"swsh9", title:"Brilliant Stars", code:"BRS", date:"2022-02-25"},
     {id:"swsh8", title:"Fusion Strike", code:"FST", date:"2021-11-12"},
-    {id:"cel25cc", title:"Celebrations: Classic Collection", code:"CEL-CC", date:"2021-10-08"},
+    {id:"cel25cc", title:"Celebrations: Classic Collection", code:"CEL-CC", date:"2021-10-08", parent:"cel25"},
     {id:"cel25", title:"Celebrations", code:"CEL", date:"2021-10-08"},
     {id:"swsh7", title:"Evolving Skies", code:"EVS", date:"2021-08-27"},
     {id:"swsh6", title:"Chilling Reign", code:"CRE", date:"2021-06-18"},
     {id:"swsh5", title:"Battle Styles", code:"BST", date:"2021-03-19"},
-    {id:"swsh4.5sv", title:"Shining Fates Shiny Vault", code:"SHF-SV", date:"2021-02-19"},
+    {id:"swsh4.5sv", title:"Shining Fates Shiny Vault", code:"SHF-SV", date:"2021-02-19", parent:"swsh4.5"},
     {id:"swsh4.5", title:"Shining Fates", code:"SHF", date:"2021-02-19"},
     {id:"swsh4", title:"Vivid Voltage", code:"VIV", date:"2020-11-13"},
     {id:"swsh3.5", title:"Champion's Path", code:"CPA", date:"2020-09-25"},
@@ -300,7 +300,7 @@ const SERIES = [
   ]},
   { id:"sm", title:"Sun & Moon", eyebrow:"English TCG", lazy:true, sets:[
     {id:"sm12", title:"Cosmic Eclipse", code:"CEC", date:"2019-11-01", ts:"sm"},
-    {id:"sma", title:"Hidden Fates Shiny Vault", code:"SMA", date:"2019-08-23", ts:"sm"},
+    {id:"sma", title:"Hidden Fates Shiny Vault", code:"SMA", date:"2019-08-23", ts:"sm", parent:"sm115"},
     {id:"sm115", title:"Hidden Fates", code:"HIF", date:"2019-08-23", ts:"sm"},
     {id:"sm11", title:"Unified Minds", code:"UNM", date:"2019-08-02", ts:"sm"},
     {id:"sm10", title:"Unbroken Bonds", code:"UNB", date:"2019-05-03", ts:"sm"},
@@ -342,14 +342,14 @@ const SERIES = [
     {id:"xy2", title:"Flashfire", code:"FLF", date:"2014-05-07", ts:"xy"},
     {id:"tk-xy-n", title:"XY trainer Kit (Noivern)", code:"TK6N", date:"2014-03-12", ts:"tk"},
     {id:"tk-xy-sy", title:"XY trainer Kit (Sylveon)", code:"TK6S", date:"2014-03-12", ts:"tk"},
-    {id:"xya", title:"Yellow A Alternate", code:"XYA", date:"2014-02-05", ts:"xy"},
+    {id:"xya", title:"Yellow A Alternate", code:"XYA", date:"2014-02-05", ts:"xy", parent:"xy1"},
     {id:"xy1", title:"XY", code:"XY", date:"2014-02-05", ts:"xy"},
     {id:"xy0", title:"Kalos Starter Set", code:"KSS", date:"2013-11-08", ts:"xy"},
     {id:"xyp", title:"XY Black Star Promos", code:"XYP", date:"2013-10-12", ts:"xy"},
   ]},
   { id:"bw", title:"Black & White", eyebrow:"English TCG", lazy:true, sets:[
     {id:"bw11", title:"Legendary Treasures", code:"LTR", date:"2013-11-06", ts:"bw"},
-    {id:"rc", title:"Radiant Collection", code:"RC", date:"2013-11-06", ts:"bw"},
+    {id:"rc", title:"Radiant Collection", code:"RC", date:"2013-11-06", ts:"bw", parent:"bw11"},
     {id:"bw10", title:"Plasma Blast", code:"PLB", date:"2013-08-14", ts:"bw"},
     {id:"bw9", title:"Plasma Freeze", code:"PLF", date:"2013-05-08", ts:"bw"},
     {id:"bw8", title:"Plasma Storm", code:"PLS", date:"2013-02-06", ts:"bw"},
@@ -416,7 +416,7 @@ const SERIES = [
     {id:"ex12", title:"Legend Maker", code:"LM", date:"2006-02-13", ts:"ex"},
     {id:"ex11", title:"Delta Species", code:"DS", date:"2005-10-31", ts:"ex"},
     {id:"ex10", title:"Unseen Forces", code:"UF", date:"2005-08-22", ts:"ex"},
-    {id:"exu", title:"Unseen Forces Unown Collection", code:"EXU", date:"2005-08-22", ts:"ex"},
+    {id:"exu", title:"Unseen Forces Unown Collection", code:"EXU", date:"2005-08-22", ts:"ex", parent:"ex10"},
     {id:"ex9", title:"Emerald", code:"EM", date:"2005-05-09", ts:"ex"},
     {id:"ex8", title:"Deoxys", code:"DX", date:"2005-02-01", ts:"ex"},
     {id:"ex7", title:"Team Rocket Returns", code:"TR", date:"2004-11-01", ts:"ex"},
@@ -435,7 +435,7 @@ const SERIES = [
     {id:"ecard2", title:"Aquapolis", code:"AQ", date:"2003-01-15", ts:"ecard"},
     {id:"bog", title:"Best of game", code:"BOG", date:"2002-12-01", ts:"ecard"},
     {id:"ecard1", title:"Expedition Base Set", code:"EX", date:"2002-09-15", ts:"ecard"},
-    {id:"sp", title:"Sample", code:"SP", date:"2002-08-01", ts:"ecard"},
+    {id:"sp", title:"Sample", code:"SP", date:"2002-08-01", ts:"ecard", parent:"ecard1"},
   ]},
   { id:"neo", title:"Neo", eyebrow:"English TCG", lazy:true, sets:[
     {id:"lc", title:"Legendary Collection", code:"LC", date:"2002-05-24", ts:"lc"},
@@ -453,7 +453,7 @@ const SERIES = [
     {id:"base5", title:"Team Rocket", code:"RO", date:"2000-04-24", ts:"base"},
     {id:"base4", title:"Base Set 2", code:"B2", date:"2000-02-24", ts:"base"},
     {id:"base3", title:"Fossil", code:"FO", date:"1999-10-10", ts:"base"},
-    {id:"wp", title:"W Promotional", code:"WP", date:"1999-09-01", ts:"base"},
+    {id:"wp", title:"W Promotional", code:"WP", date:"1999-09-01", ts:"base", parent:"basep"},
     {id:"basep", title:"Wizards Black Star Promos", code:"BASEP", date:"1999-07-01", ts:"base"},
     {id:"base2", title:"Jungle", code:"JU", date:"1999-06-16", ts:"base"},
     {id:"base1", title:"Base Set", code:"BS", date:"1999-01-09", ts:"base"},
@@ -481,7 +481,7 @@ const SERIES = [
 /* ---------- English card data from TCGdex ---------- */
 const TCG = "https://api.tcgdex.net/v2/en";
 const PKSYM = {"me06":"me06","30th":"cel30","30th-c":"cel30c","me05":"me05","me04":"me04","me03":"me03","me02.5":"me02pt5","me02":"me02","me01":"me01","mep":"MEP","mee":"mee",
-  "sv10.5w":"sv10pt5_wht","sv10.5b":"sv10pt5_blk","sv10":"sv10","sv09":"sv9","sv08.5":"sv8pt5","sv08":"sv8","sv07":"sv7","sv06.5":"sv6pt5","sv06":"sv6","sv05":"sv5","sv04.5":"sv4pt5","sv04":"sv4","sv03.5":"sv3pt5","sv03":"sv3","sv02":"sv2","sv01":"sv1","svp":"svp","sve":"sve23","swsh12.5gg":"swsh12pt5gg","swsh12.5":"swsh12pt5","swsh12tg":"swsh12tg","swsh12":"swsh12","swsh11tg":"swsh11tg","swsh11":"swsh11","swsh10.5":"pgo","swsh10tg":"swsh10tg","swsh10":"swsh10","swsh9tg":"swsh9tg","swsh9":"swsh9","swsh8":"swsh8","cel25cc":"cel25c","cel25":"cel25","swsh7":"swsh7","swsh6":"swsh6","swsh5":"swsh5","swsh4.5sv":"swsh45sv","swsh4.5":"swsh45","swsh4":"swsh4","swsh3.5":"swsh35","swsh3":"swsh3","swsh2":"swsh2","swsh1":"swsh1","swshp":"swshp","sm12":"sm12","sma":"sma","sm115":"sm115","sm11":"sm11","sm10":"sm10","det1":"det1","sm9":"sm9","sm8":"sm8","sm7.5":"sm75","sm7":"sm7","sm6":"sm6","sm5":"sm5","sm4":"sm4","sm3.5":"sm35","sm3":"sm3","sm2":"sm2","tk-sm-r":"tk10b","tk-sm-l":"tk10a","smp":"smp","sm1":"sm1","xy12":"xy12","xy11":"xy11","xy10":"xy10","tk-xy-p":"tk9a","tk-xy-su":"tk9b","g1":"g1","xy9":"xy9","xy8":"xy8","xy7":"xy7","xy6":"xy6","tk-xy-latia":"tk8b","tk-xy-latio":"tk8a","dc1":"dc1","xy5":"xy5","xy4":"xy4","tk-xy-w":"tk7b","tk-xy-b":"tk7a","xy3":"xy3","xy2":"xy2","tk-xy-n":"tk6a","tk-xy-sy":"tk6b","xy1":"xy1","xy0":"xy0","xyp":"xyp","bw11":"bw11","bw10":"bw10","bw9":"bw9","bw8":"bw8","bw7":"bw7","dv1":"dv1","bw6":"bw6","bw5":"bw5","bw4":"bw4","bw3":"bw3","tk-bw-e":"tk5b","tk-bw-z":"tk5a","bw2":"bw2","bwp":"bwp","bw1":"bw1","col1":"col1","hgss4":"hgss4","hgss3":"hgss3","hgss2":"hgss2","tk-hs-g":"tk4a","tk-hs-r":"tk4b","hgssp":"hsp","hgss1":"hgss1","ru1":"ru1","pl4":"pl4","pl3":"pl3","pl2":"pl2","pl1":"pl1","dp7":"dp7","dp6":"dp6","dp5":"dp5","dp4":"dp4","dp3":"dp3","tk-dp-m":"tk3a","tk-dp-l":"tk3b","dp2":"dp2","dpp":"dpp","dp1":"dp1","pop9":"pop9","pop8":"pop8","pop7":"pop7","pop6":"pop6","pop5":"pop5","pop4":"pop4","pop3":"pop3","pop2":"pop2","pop1":"pop1","np":"np","ex16":"ex16","ex15":"ex15","ex14":"ex14","ex13":"ex13","tk-ex-m":"tk2b","tk-ex-p":"tk2a","ex12":"ex12","ex11":"ex11","ex10":"ex10","ex9":"ex9","ex8":"ex8","ex7":"ex7","ex6":"ex6","tk-ex-latia":"tk1a","tk-ex-latio":"tk1b","ex5":"ex5","ex4":"ex4","ex3":"ex3","ex2":"ex2","ex1":"ex1","ecard3":"ecard3","ecard2":"ecard2","bog":"bp","ecard1":"ecard1","lc":"base6","neo4":"neo4","neo3":"neo3","si1":"si1","neo2":"neo2","neo1":"neo1","gym2":"gym2","gym1":"gym1","base5":"base5","base4":"base4","base3":"base3","basep":"basep","base2":"base2","base1":"base1","2023sv":"mcd23","2022swsh":"mcd22","2021swsh":"mcd21","fut2020":"fut20","2019sm":"mcd19","2018sm":"mcd18","2017sm":"mcd17","2016xy":"mcd16","2015xy":"mcd15","2014xy":"mcd14","2012bw":"mcd12","2011bw":"mcd11"};
+  "sv10.5w":"sv10pt5_wht","sv10.5b":"sv10pt5_blk","sv10":"sv10","sv09":"sv9","sv08.5":"sv8pt5","sv08":"sv8","sv07":"sv7","sv06.5":"sv6pt5","sv06":"sv6","sv05":"sv5","sv04.5":"sv4pt5","sv04":"sv4","sv03.5":"sv3pt5","sv03":"sv3","sv02":"sv2","sv01":"sv1","svp":"svp","sve":"sve23","swsh12.5gg":"swsh12pt5gg","swsh12.5":"swsh12pt5","swsh12tg":"swsh12tg","swsh12":"swsh12","swsh11tg":"swsh11tg","swsh11":"swsh11","swsh10.5":"pgo","swsh10tg":"swsh10tg","swsh10":"swsh10","swsh9tg":"swsh9tg","swsh9":"swsh9","swsh8":"swsh8","cel25cc":"cel25c","cel25":"cel25","swsh7":"swsh7","swsh6":"swsh6","swsh5":"swsh5","swsh4.5sv":"swsh45sv","swsh4.5":"swsh45","swsh4":"swsh4","swsh3.5":"swsh35","swsh3":"swsh3","swsh2":"swsh2","swsh1":"swsh1","swshp":"swshp","sm12":"sm12","sma":"sma","sm115":"sm115","sm11":"sm11","sm10":"sm10","det1":"det1","sm9":"sm9","sm8":"sm8","sm7.5":"sm75","sm7":"sm7","sm6":"sm6","sm5":"sm5","sm4":"sm4","sm3.5":"sm35","sm3":"sm3","sm2":"sm2","tk-sm-r":"tk10b","tk-sm-l":"tk10a","smp":"smp","sm1":"sm1","xy12":"xy12","xy11":"xy11","xy10":"xy10","tk-xy-p":"tk9a","tk-xy-su":"tk9b","g1":"g1","xy9":"xy9","xy8":"xy8","xy7":"xy7","xy6":"xy6","tk-xy-latia":"tk8b","tk-xy-latio":"tk8a","dc1":"dc1","xy5":"xy5","xy4":"xy4","tk-xy-w":"tk7b","tk-xy-b":"tk7a","xy3":"xy3","xy2":"xy2","tk-xy-n":"tk6a","tk-xy-sy":"tk6b","xy1":"xy1","xy0":"xy0","xyp":"xyp","bw11":"bw11","bw10":"bw10","bw9":"bw9","bw8":"bw8","bw7":"bw7","dv1":"dv1","bw6":"bw6","bw5":"bw5","bw4":"bw4","bw3":"bw3","tk-bw-e":"tk5b","tk-bw-z":"tk5a","bw2":"bw2","bwp":"bwp","bw1":"bw1","col1":"col1","hgss4":"hgss4","hgss3":"hgss3","hgss2":"hgss2","tk-hs-g":"tk4a","tk-hs-r":"tk4b","hgssp":"hsp","hgss1":"hgss1","ru1":"ru1","pl4":"pl4","pl3":"pl3","pl2":"pl2","pl1":"pl1","dp7":"dp7","dp6":"dp6","dp5":"dp5","dp4":"dp4","dp3":"dp3","tk-dp-m":"tk3a","tk-dp-l":"tk3b","dp2":"dp2","dpp":"dpp","dp1":"dp1","pop9":"pop9","pop8":"pop8","pop7":"pop7","pop6":"pop6","pop5":"pop5","pop4":"pop4","pop3":"pop3","pop2":"pop2","pop1":"pop1","np":"np","ex16":"ex16","ex15":"ex15","ex14":"ex14","ex13":"ex13","tk-ex-m":"tk2b","tk-ex-p":"tk2a","ex12":"ex12","ex11":"ex11","ex10":"ex10","ex9":"ex9","ex8":"ex8","ex7":"ex7","ex6":"ex6","tk-ex-latia":"tk1a","tk-ex-latio":"tk1b","ex5":"ex5","ex4":"ex4","ex3":"ex3","ex2":"ex2","ex1":"ex1","ecard3":"ecard3","ecard2":"ecard2","bog":"bp","ecard1":"ecard1","lc":"base6","neo4":"neo4","neo3":"neo3","si1":"si1","neo2":"neo2","neo1":"neo1","gym2":"gym2","gym1":"gym1","base5":"base5","base4":"base4","base3":"base3","basep":"basep","base2":"base2","base1":"base1","2024sv":"mcd24","2023sv":"mcd23","2022swsh":"mcd22","2021swsh":"mcd21","fut2020":"fut20","2019sm":"mcd19","2018sm":"mcd18","2017sm":"mcd17","2016xy":"mcd16","2015xy":"mcd15","2014xy":"mcd14","2012bw":"mcd12","2011bw":"mcd11"};
 const seriesOf = id => { const sr = SERIES.find(sr=>sr.sets.some(m=>m.id===id))||{id:"me",sets:[]}; const m = sr.sets.find(m=>m.id===id); return (m&&m.ts) || sr.ts || sr.id; };
 const CACHE = "pkmn-binder-cards-v3", CACHE_DAYS = 3;
 const FOIL = {"":"Reverse holo",pokeball:"Poké Ball",masterball:"Master Ball",energy:"Energy reverse",friendball:"Friend Ball",loveball:"Love Ball",quickball:"Quick Ball",duskball:"Dusk Ball","team-rocket":"Team Rocket"};
@@ -700,6 +700,28 @@ function wishCount(){
 }
 function wishBadge(){ const n=wishCount(); document.querySelectorAll(".wishn").forEach(el=>el.textContent=n||""); }
 
+/* ---------- set logos: subsets use their main set's logo, then TCGdex, then pkmn.gg ---------- */
+let logoGood = {}; try{ logoGood = JSON.parse(localStorage.getItem("pkmn-binder-logos")) || {}; }catch(e){}
+function logoList(m, seen){
+  seen = seen || new Set(); if(!m || seen.has(m.id)) return []; seen.add(m.id);
+  const base = (cache[m.id]&&cache[m.id].logo) || `https://assets.tcgdex.net/en/${seriesOf(m.id)}/${m.id}/logo`;
+  const own = [m.logo&&m.logo+".png", base+".png", base+".webp", PKSYM[m.id]&&`https://site.pkmn.gg/images/sets/logos/${PKSYM[m.id]}.webp`];
+  const list = m.parent ? [...logoList(metaOf(m.parent), seen), ...own] : own;
+  return [...new Set(list.filter(Boolean))];
+}
+function logoHTML(m){
+  let list = logoList(m); const good = logoGood[m.id];
+  if(good && list.includes(good)) list = [good, ...list.filter(u=>u!==good)];
+  return `<img src="${esc(list[0])}" data-set="${esc(m.id)}" data-alt="${esc(list.slice(1).join("|"))}" alt="${esc(m.title)}" loading="lazy" onload="logoLoad(this)" onerror="logoFail(this)">`;
+}
+function logoLoad(img){ const id = img.dataset.set; if(logoGood[id]!==img.src){ logoGood[id] = img.src; try{ localStorage.setItem("pkmn-binder-logos", JSON.stringify(logoGood)); }catch(e){} } }
+function logoFail(img){
+  const rest = (img.dataset.alt||"").split("|").filter(Boolean);
+  if(logoGood[img.dataset.set]===img.src){ delete logoGood[img.dataset.set]; }
+  if(rest.length){ img.dataset.alt = rest.slice(1).join("|"); img.src = rest[0]; return; }
+  const t = document.createElement("span"); t.className = "alt"; t.textContent = img.alt; img.replaceWith(t);
+}
+
 /* ---------- summary page ---------- */
 const pct = (a,b) => b ? Math.round(a/b*1000)/10 : 0;
 let openSeries = null;
@@ -711,10 +733,9 @@ function renderHome(){
     let sOwn=0, sTot=0, pending=false;
     const tiles = sr.sets.map(m=>{
       const st = stat(m.id); if(st){ sOwn+=st.own; sTot+=st.total; } else { pending=true; sOwn+=(progress.sets[m.id]||[]).length; }
-      const logo = m.local ? "" : m.logo || (cache[m.id]&&cache[m.id].logo) || `https://assets.tcgdex.net/en/${sr.id}/${m.id}/logo`;
-      const p = st ? pct(st.own,st.total) : 0;
+            const p = st ? pct(st.own,st.total) : 0;
       return `<a class="tile ${st&&st.total&&st.own===st.total?"done":""}" href="#set-${encodeURIComponent(m.id)}">
-        <div class="top"><div class="logo">${logo?`<img src="${esc(logo)}.png" alt="${esc(m.title)}" loading="lazy" onerror="this.outerHTML='<span class=alt>${esc(m.title)}</span>'">`:`<span class="alt">${esc(m.title)}</span>`}</div>
+        <div class="top"><div class="logo">${m.local?`<span class="alt">${esc(m.title)}</span>`:logoHTML(m)}</div>
         <span class="badge" title="Set code ${esc(m.code)}">${PKSYM[m.id]?`<img src="https://site.pkmn.gg/images/sets/symbols/${PKSYM[m.id]}.webp" alt="" loading="lazy" onerror="this.remove()">`:""}<b>${esc(m.code)}</b></span></div>
         <div><div class="nm">${esc(m.title)}</div><div class="dt">${new Date(m.date).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}${m.sub?" · "+esc(m.sub):""} · ${esc(m.code)}</div></div>
         <div class="prog"><div class="bar"><i style="width:${p}%"></i></div><b>${st?p+"%":"…"}</b></div>
