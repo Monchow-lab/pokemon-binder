@@ -515,7 +515,44 @@ let lastView = perView();
 addEventListener("resize", ()=>{ if(view==="set" && perView()!==lastView){ const p=spread*lastView; lastView=perView(); spread=Math.floor(p/lastView); renderSet(); } else lastView=perView(); });
 document.addEventListener("visibilitychange", async()=>{ if(!document.hidden && gh.token && syncState==="ok"){ try{ await pull(); render(); }catch(e){} } });
 
-route(); initFile(); loadAll(false);
+
+/* ---------- one-off import of collected cards from pkmn.gg ---------- */
+const PK = {n:"n",h:"h",r:"r-",E:"r-energy",P:"r-pokeball",F:"r-friendball",L:"r-loveball",Q:"r-quickball",D:"r-duskball",R:"r-team-rocket"};
+async function runImport(){
+  let data; try{ data = await fetch("pkmn-import.json",{cache:"no-store"}).then(r=>r.ok?r.json():null); }catch(e){ return; }
+  if(!data || (progress.imports||[]).includes(data.id)) return;
+  let added = 0, missed = [];
+  for(const [sid, str] of Object.entries(data.sets)){
+    if(!cache[sid]){ try{ await fetchSet(sid); }catch(e){ missed.push(sid+" (set not loaded)"); continue; } }
+    const byLid = {}; for(const row of cache[sid].rows) byLid[row[0]] = row[3];
+    const list = new Set(progress.sets[sid]||[]);
+    for(const item of str.split(",")){
+      const [lid, codes] = item.split(":"); const vs = byLid[lid];
+      if(!vs){ missed.push(sid+" "+lid); continue; }
+      for(const code of codes.split("+")){
+        let k = PK[code];
+        if(!vs.includes(k)){
+          if(vs.length===1) k = vs[0];
+          else if(k==="h" && vs.includes("n") && !vs.includes("h")) k = "n";
+          else if(k==="n" && vs.includes("h") && !vs.includes("n")) k = "h";
+          else if(k && k.startsWith("r-") && vs.includes("r-")) k = "r-";
+          else { missed.push(sid+" "+lid+" "+code); continue; }
+        }
+        const id = lid+"-"+k; if(!list.has(id)){ list.add(id); added++; }
+      }
+    }
+    progress.sets[sid] = [...list];
+  }
+  progress.imports = [...(progress.imports||[]), data.id];
+  progress.updated = new Date().toISOString();
+  saveLocal(); writeToFile(); render();
+  if(missed.length) console.warn("pkmn.gg import: not matched", missed);
+  $("syncmsg").textContent = `Imported ${added} cards from pkmn.gg` + (missed.length ? ` (${missed.length} couldn't be matched)` : "") + ".";
+  window.__importResult = {added, missed};
+}
+
+route();
+Promise.all([initFile(), loadAll(false)]).then(runImport);
 </script>
 </body>
 </html>
