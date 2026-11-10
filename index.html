@@ -281,6 +281,7 @@ const CACHE = "pkmn-binder-cards-v2", CACHE_DAYS = 3;
 const FOIL = {"":"Reverse holo",pokeball:"Poké Ball",masterball:"Master Ball",energy:"Energy reverse",friendball:"Friend Ball",loveball:"Love Ball",quickball:"Quick Ball",duskball:"Dusk Ball","team-rocket":"Team Rocket"};
 const RARE = {"common":"C","uncommon":"U","rare":"R","double rare":"RR","illustration rare":"IR","ultra rare":"UR","special illustration rare":"SIR","mega hyper rare":"MHR","mega attack rare":"MAR","hyper rare":"HR","shiny rare":"SR","none":""};
 let cache = {};
+try{ localStorage.removeItem("pkmn-binder-cards-v1"); }catch(e){}
 try{ cache = JSON.parse(localStorage.getItem(CACHE)) || {}; }catch(e){}
 const saveCache = () => { try{ localStorage.setItem(CACHE, JSON.stringify(cache)); }catch(e){} };
 
