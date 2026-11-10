@@ -6,10 +6,11 @@
 <title>Pokémon Binder</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
-/* Layout: two-page binder spread (3x3 pockets per page) on a desk surface; one page on narrow screens */
+/* Layout: summary page of series → set tiles; each set opens a two-page binder spread (3x3 pockets per page) */
 :root{
   --desk:#e7e9ee; --page:#f8f9fb; --pocket:#ffffff; --line:#d3d7df; --ink:#1b1e27; --muted:#626a7a;
-  --spine:#2a3142; --accent:#d93a3a; --pb:#d93a3a; --mb:#7a4bd1; --gold:#b8860b; --own:#1f8f5a; --warnbg:#fff4d6; --warn:#7a5a00;
+  --spine:#2a3142; --accent:#d93a3a; --rv:#2f7fd6; --pb:#d93a3a; --mb:#7a4bd1; --en:#13958a; --holo:#8a93a6; --gold:#b8860b;
+  --own:#1f8f5a; --warnbg:#fff4d6; --warn:#7a5a00; --tile:#ffffff;
   --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
   --body:"Inter",ui-sans-serif,system-ui,sans-serif;
   --mono:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace;
@@ -17,35 +18,61 @@
 }
 @media (prefers-color-scheme:dark){:root{
   --desk:#12141a; --page:#1b1f29; --pocket:#232836; --line:#343b4c; --ink:#e9ecf3; --muted:#9aa3b5;
-  --spine:#0b0d12; --accent:#ff6262; --pb:#ff6b6b; --mb:#b08cff; --gold:#e5b94a; --own:#4cd18f; --warnbg:#3a3017; --warn:#f2d27a; color-scheme:dark}}
+  --spine:#0b0d12; --accent:#ff6262; --rv:#6aaeff; --pb:#ff6b6b; --mb:#b08cff; --en:#3fd1c2; --holo:#aab3c6; --gold:#e5b94a;
+  --own:#4cd18f; --warnbg:#3a3017; --warn:#f2d27a; --tile:#1f2430; color-scheme:dark}}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 html,body{margin:0}
 body{background:var(--desk);color:var(--ink);font-family:var(--body);font-size:14px;padding:20px 16px 40px}
-.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
-header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
-h1{font-family:var(--display);font-weight:800;font-size:clamp(1.6rem,3.5vw,2.3rem);margin:0;letter-spacing:-.01em}
-h1 small{display:block;font-family:var(--mono);font-size:.72rem;font-weight:500;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
-.stats{display:flex;align-items:center;gap:14px;font-variant-numeric:tabular-nums}
-.count{font-family:var(--mono);font-weight:700;font-size:1.1rem}
+.wrap{max-width:1240px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+a{color:inherit}
+h1,h2{font-family:var(--display);margin:0;letter-spacing:-.01em;text-wrap:balance}
+h1{font-weight:800;font-size:clamp(1.6rem,3.5vw,2.3rem)}
+h2{font-weight:800;font-size:clamp(1.3rem,2.6vw,1.7rem)}
+.eyebrow{display:block;font-family:var(--mono);font-size:.72rem;font-weight:500;letter-spacing:.12em;color:var(--muted);text-transform:uppercase;margin-bottom:4px}
+.row{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
+.stats{display:flex;align-items:center;gap:12px;font-variant-numeric:tabular-nums}
+.count{font-family:var(--mono);font-weight:700;font-size:1.05rem}
 .count span{color:var(--muted);font-weight:500;font-size:.85rem}
 .bar{width:180px;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
 .bar i{display:block;height:100%;background:var(--own);width:0;transition:width .3s}
-.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-input[type=search],select{font:inherit;color:var(--ink);background:var(--pocket);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
-input[type=search]{flex:1 1 220px}
 button{font:inherit;font-weight:600;color:var(--ink);background:var(--pocket);border:1px solid var(--line);border-radius:8px;padding:8px 12px;cursor:pointer}
 button:hover{border-color:var(--muted)}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button:focus-visible,input:focus-visible,select:focus-visible,a:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 button.primary{background:var(--ink);color:var(--page);border-color:var(--ink)}
 button:disabled{opacity:.4;cursor:default}
+input[type=search],select{font:inherit;color:var(--ink);background:var(--pocket);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-width:0}
+input[type=search]{flex:1 1 220px}
 .sync{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:10px 12px;border-radius:10px;background:var(--pocket);border:1px solid var(--line);font-size:13px}
 .sync.warn{background:var(--warnbg);color:var(--warn);border-color:transparent}
 .sync .dot{width:9px;height:9px;border-radius:50%;background:var(--muted)}
 .sync.ok .dot{background:var(--own)}
 .sync .grow{flex:1 1 200px}
+
+/* summary */
+.series{display:flex;flex-direction:column;gap:12px;padding-top:8px}
+.serieshead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 24px;border-bottom:1px solid var(--line);padding-bottom:10px}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.tile{display:flex;flex-direction:column;gap:10px;padding:16px;border-radius:12px;background:var(--tile);border:1px solid var(--line);text-decoration:none;cursor:pointer;transition:transform .12s,border-color .12s;min-width:0}
+.tile:hover{transform:translateY(-2px);border-color:var(--muted)}
+.tile .logo{height:64px;display:flex;align-items:center}
+.tile .logo img{max-height:64px;max-width:100%;object-fit:contain}
+.tile .logo .alt{font-family:var(--display);font-weight:800;font-size:1.25rem}
+.tile .nm{font-family:var(--display);font-weight:600;font-size:1.05rem}
+.tile .dt{font-size:12px;color:var(--muted)}
+.tile .prog{display:flex;align-items:center;gap:10px;font-variant-numeric:tabular-nums}
+.tile .prog .bar{flex:1;width:auto}
+.tile .prog b{font-family:var(--mono);font-size:.95rem;min-width:52px;text-align:right}
+.tile .sub{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.tile.done{border-color:var(--own)}
+.note{font-size:12px;color:var(--muted)}
+
+/* set view */
+.back{align-self:flex-start;text-decoration:none;font-weight:600;color:var(--muted)}
+.back:hover{color:var(--ink)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12px;color:var(--muted)}
-.legend b{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.legend b{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px;border:1px solid var(--line)}
 .binder{display:grid;grid-template-columns:1fr 22px 1fr;background:var(--spine);border-radius:14px;padding:14px}
 .spine{background:repeating-linear-gradient(var(--spine) 0 30px,#ffffff10 30px 34px)}
 .page{background:var(--page);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:10px;min-width:0}
@@ -53,84 +80,84 @@ button:disabled{opacity:.4;cursor:default}
 .pagehead{display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
 .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
 .slot{position:relative;display:flex;flex-direction:column;gap:5px;min-width:0}
-.pocket{position:relative;aspect-ratio:63/88;max-width:100%;border-radius:7px;overflow:hidden;background:var(--pocket);
-  border:1px dashed var(--line);cursor:pointer;padding:0;display:block;width:100%;transition:transform .12s}
+.pocket{position:relative;aspect-ratio:63/88;max-width:100%;border-radius:7px;overflow:hidden;background:var(--pocket);border:1px dashed var(--line);cursor:pointer;padding:0;display:block;width:100%;transition:transform .12s}
 .pocket:hover{transform:translateY(-2px)}
 .pocket img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(1);opacity:.38;transition:filter .2s,opacity .2s}
 .slot.owned .pocket{border:2px solid var(--own)}
 .slot.owned .pocket img{filter:none;opacity:1}
-.pocket .fallback{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;padding:8px;text-align:center;font-family:var(--display);font-weight:600;font-size:.9rem;color:var(--muted)}
-.pocket .fallback b{font-family:var(--mono);font-size:1.3rem;color:var(--ink)}
+.fallback{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;padding:8px;text-align:center;font-family:var(--display);font-weight:600;font-size:.9rem;color:var(--muted)}
+.fallback b{font-family:var(--mono);font-size:1.3rem;color:var(--ink)}
 .tick{position:absolute;right:6px;bottom:6px;width:22px;height:22px;border-radius:6px;border:2px solid #fff;background:#0006;display:grid;place-items:center}
 .slot.owned .tick{background:var(--own);border-color:var(--own)}
 .slot.owned .tick::after{content:"";width:9px;height:5px;border:2.5px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
 .zoom{position:absolute;left:6px;top:6px;width:26px;height:26px;padding:0;border-radius:6px;border:0;background:#000a;color:#fff;font-size:14px;line-height:26px;opacity:0;transition:opacity .15s}
 .slot:hover .zoom,.zoom:focus-visible{opacity:1}
+@media (hover:none){.zoom{opacity:.85}}
 .label{display:flex;align-items:center;gap:5px;font-size:11px;min-width:0}
 .label .no{font-family:var(--mono);font-weight:700;font-variant-numeric:tabular-nums}
 .label .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);flex:1;min-width:0}
-.vdot{width:8px;height:8px;border-radius:2px;flex:none;border:1px solid var(--line)}
-.vdot.pb{background:var(--pb);border-color:var(--pb)} .vdot.mb{background:var(--mb);border-color:var(--mb)} .vdot.sec{background:var(--gold);border-color:var(--gold)}
+.vdot{width:8px;height:8px;border-radius:2px;flex:none;border:1px solid var(--line);background:var(--pocket)}
+.c-rv{background:var(--rv);border-color:var(--rv)} .c-pb{background:var(--pb);border-color:var(--pb)} .c-mb{background:var(--mb);border-color:var(--mb)}
+.c-en{background:var(--en);border-color:var(--en)} .c-holo{background:var(--holo);border-color:var(--holo)} .c-sec{background:var(--gold);border-color:var(--gold)}
 .slot.hit .pocket{box-shadow:0 0 0 3px var(--accent)}
 .slot.empty{visibility:hidden}
 .nav{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px}
 .nav .where{font-family:var(--mono);font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.loading{padding:40px;text-align:center;color:var(--muted);font-family:var(--mono);background:var(--page);border-radius:8px}
 .lightbox{position:fixed;inset:0;background:#000c;display:flex;align-items:center;justify-content:center;padding:24px;z-index:20}
 .lightbox figure{margin:0;display:flex;flex-direction:column;gap:10px;align-items:center;color:#fff;max-height:100%}
 .lightbox img{max-height:78vh;max-width:90vw;border-radius:12px}
 .lightbox figcaption{font-family:var(--display);font-size:1.1rem;text-align:center}
 .lightbox figcaption small{display:block;font-family:var(--mono);font-size:.75rem;opacity:.75;margin-top:2px}
-.note{font-size:12px;color:var(--muted)}
 @media (max-width:760px){.binder{grid-template-columns:1fr;padding:8px}.spine,.page.right{display:none}.grid{gap:7px}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 </head>
 <body>
 <div class="wrap">
-  <header>
-    <h1><small id="setmeta"></small><span id="settitle"></span></h1>
-    <div class="stats"><div class="count" id="count"></div><div class="bar"><i id="bar"></i></div><div class="count" id="pct"></div></div>
-  </header>
+
+  <!-- ===== summary ===== -->
+  <section id="home" class="wrap" style="gap:28px">
+    <div class="row">
+      <h1><span class="eyebrow">Monchow's collection</span>Pokémon Binder</h1>
+      <div class="stats"><div class="count" id="allcount"></div><div class="bar"><i id="allbar"></i></div><div class="count" id="allpct"></div></div>
+    </div>
+    <div id="serieslist" class="wrap" style="gap:32px"></div>
+    <p class="note">Every print counts as its own pocket, so reverse holos and ball reverses are counted separately. English card data and images come from TCGdex, refreshed every few days (<button id="refresh" style="padding:2px 8px;font-size:12px">Refresh card data now</button>). Collect 151 images come from Bill's Archive.</p>
+  </section>
+
+  <!-- ===== set binder ===== -->
+  <section id="setview" class="wrap" hidden>
+    <a href="#" class="back">← All sets</a>
+    <div class="row">
+      <h1><span class="eyebrow" id="setmeta"></span><span id="settitle"></span></h1>
+      <div class="stats"><div class="count" id="count"></div><div class="bar"><i id="bar"></i></div><div class="count" id="pct"></div></div>
+    </div>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Find a card: name or number, e.g. Gengar or 094">
+      <select id="jump" aria-label="Jump to section"></select>
+      <select id="mode" aria-label="Show">
+        <option value="all">Show every pocket</option>
+        <option value="missing">Fade what I own</option>
+      </select>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div class="binder" id="binder"></div>
+    <div class="nav">
+      <button id="prev">← Previous</button>
+      <span class="where" id="where"></span>
+      <button id="next" class="primary">Next →</button>
+    </div>
+  </section>
 
   <div class="sync" id="sync"><span class="dot"></span><span class="grow" id="syncmsg"></span><span id="syncbtns"></span></div>
-
-  <div class="tools">
-    <select id="set" aria-label="Choose set"></select>
-    <input type="search" id="q" placeholder="Find a card: name or number, e.g. Gengar or 094">
-    <select id="jump" aria-label="Jump to section"></select>
-    <select id="mode" aria-label="Show">
-      <option value="all">Show every pocket</option>
-      <option value="missing">Fade what I own</option>
-    </select>
-  </div>
-  <div class="legend">
-    <span><b style="background:var(--pocket);border:1px solid var(--line)"></b>Normal</span>
-    <span><b style="background:var(--pb)"></b>Poké Ball reverse</span>
-    <span><b style="background:var(--mb)"></b>Master Ball reverse</span>
-    <span><b style="background:var(--gold)"></b>Secret rare</span>
-    <span>Click a card to mark it collected · ← → to turn pages</span>
-  </div>
-
-  <div class="binder" id="binder"></div>
-
-  <div class="nav">
-    <button id="prev">← Previous</button>
-    <span class="where" id="where"></span>
-    <button id="next" class="primary">Next →</button>
-  </div>
-  <p class="note">Card images load from Bill's Archive (billsarchive.com). Missing cards show greyed out; collected cards show in full colour.</p>
 </div>
 
 <div class="lightbox" id="lightbox" hidden></div>
 
 <script>
-/* ============================================================
-   SETS — add a new set by adding another entry to this list.
-   Each card: {no, name, rar, v (variant label), cls ("", "pb", "mb", "sec"), img}
-   ============================================================ */
 const IMG = "https://bills-archive.nyc3.cdn.digitaloceanspaces.com/cn_cards/";
 const SETS = [];
-
 /* ---------- Collect 151 (Simplified Chinese, 151C) ---------- */
 (function(){
   // dex order: "<code> <image slug>" for 001–151
@@ -163,27 +190,91 @@ const SETS = [];
   });
 })();
 
-/* ---------- add the next set below this line ---------- */
+
 
 /* ============================================================
-   App
+   SERIES — the summary page. English sets load their card list from TCGdex.
+   To add a set: add {id (TCGdex id), title, code, date} to a series below.
    ============================================================ */
-SETS.forEach(s=>s.cards.forEach(c=>c.id=String(c.no).padStart(3,"0")+"-"+c.v.replace(/\W/g,"").toLowerCase()));
+const SERIES = [
+  { id:"me", title:"Mega Evolution", eyebrow:"English TCG", sets:[
+    {id:"me06",   title:"Delta Reign",                     code:"DLR",  date:"2026-11-06"},
+    {id:"30th",   title:"30th Celebration",                code:"30C",  date:"2026-09-16"},
+    {id:"30th-c", title:"30th Anniversary: Classic Collection", code:"30CC", date:"2026-09-16"},
+    {id:"me05",   title:"Pitch Black",                     code:"PBL",  date:"2026-07-17"},
+    {id:"me04",   title:"Chaos Rising",                    code:"CRI",  date:"2026-05-22"},
+    {id:"me03",   title:"Perfect Order",                   code:"POR",  date:"2026-03-27"},
+    {id:"me02.5", title:"Ascended Heroes",                 code:"ASC",  date:"2026-01-30"},
+    {id:"me02",   title:"Phantasmal Flames",               code:"PFL",  date:"2025-11-14"},
+    {id:"me01",   title:"Mega Evolution",                  code:"MEG",  date:"2025-09-26"},
+  ]},
+  { id:"special", title:"Special", eyebrow:"One-off collections", sets:[
+    {id:"c151", title:"Collect 151", code:"151C", date:"2025-01-17", local:true, sub:"Simplified Chinese"},
+  ]},
+];
+
+/* ---------- English card data from TCGdex ---------- */
+const TCG = "https://api.tcgdex.net/v2/en";
+const CACHE = "pkmn-binder-cards-v1", CACHE_DAYS = 3;
+const FOIL = {"":"Reverse holo",pokeball:"Poké Ball",masterball:"Master Ball",energy:"Energy reverse",friendball:"Friend Ball",loveball:"Love Ball",quickball:"Quick Ball",duskball:"Dusk Ball","team-rocket":"Team Rocket"};
+const RARE = {"common":"C","uncommon":"U","rare":"R","double rare":"RR","illustration rare":"IR","ultra rare":"UR","special illustration rare":"SIR","mega hyper rare":"MHR","mega attack rare":"MAR","hyper rare":"HR","shiny rare":"SR","none":""};
+let cache = {};
+try{ cache = JSON.parse(localStorage.getItem(CACHE)) || {}; }catch(e){}
+const saveCache = () => { try{ localStorage.setItem(CACHE, JSON.stringify(cache)); }catch(e){} };
+
+async function pool(items, n, fn){ let i=0; await Promise.all(Array.from({length:n}, async()=>{ while(i<items.length){ const k=i++; await fn(items[k],k); } })); }
+
+async function fetchSet(id, force){
+  const c = cache[id];
+  if(!force && c && Date.now()-c.at < CACHE_DAYS*864e5) return c;
+  const st = await fetch(`${TCG}/sets/${encodeURIComponent(id)}`).then(r=>{ if(!r.ok) throw r.status; return r.json(); });
+  const rows = new Array(st.cards.length);
+  await pool(st.cards, 10, async (c,k)=>{
+    let d = {};
+    try{ d = await fetch(`${TCG}/cards/${encodeURIComponent(c.id)}`).then(r=>r.json()); }catch(e){}
+    const vs = [];
+    for(const v of (d.variants_detailed||[])){
+      if(v.stamp || v.foil==="cosmos" || (v.size && v.size!=="standard")) continue;
+      const key = v.type==="reverse" ? "r-"+(v.foil||"") : v.type[0];
+      if(!vs.includes(key)) vs.push(key);
+    }
+    if(!vs.length) vs.push("n");
+    rows[k] = [c.localId, c.name, d.rarity||"", vs, c.image||""];
+  });
+  cache[id] = { at:Date.now(), official:(st.cardCount&&st.cardCount.official)||rows.length, logo:st.logo||"", rows };
+  saveCache();
+  return cache[id];
+}
+const ORDER = k => k==="n"?0 : k==="h"?1 : k==="r-"?2 : 3;
+function buildCards(id){
+  const c = cache[id]; if(!c) return null;
+  const cards = [];
+  for(const [lid, name, rarity, vs, img] of c.rows){
+    const no = parseInt(lid,10), secret = no > c.official, rar = RARE[(rarity||"").toLowerCase()] ?? rarity;
+    const sorted = [...vs].sort((a,b)=>ORDER(a)-ORDER(b));
+    for(const k of sorted){
+      let v, cls;
+      if(k==="n"){ v = vs.includes("h") ? "Non-holo" : "Normal"; cls = ""; }
+      else if(k==="h"){ v = secret ? (rarity||"Secret rare") : "Holo"; cls = secret ? "sec" : "holo"; }
+      else { const f = k.slice(2); v = FOIL[f] || (f.replace(/-/g," ")+" reverse"); cls = f==="" ? "rv" : f==="masterball" ? "mb" : f==="energy" ? "en" : "pb"; }
+      cards.push({ no, lid, name, rar, v, cls, id: lid+"-"+k, img: img? img+"/low.webp":"", imgHi: img? img+"/high.webp":"" });
+    }
+  }
+  return cards;
+}
+
+/* ============================================================
+   App state
+   ============================================================ */
 const $ = id => document.getElementById(id);
 const pad = n => String(n).padStart(3,"0");
-const esc = s => s.replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[ch]));
+SETS.forEach(s=>s.cards.forEach(c=>{ c.id=pad(c.no)+"-"+c.v.replace(/\W/g,"").toLowerCase(); c.imgHi=c.img; c.cls=c.cls==="sec"?"sec":c.cls; }));
 
 let progress = {version:1, sets:{}, updated:null};
-let setId = SETS[0].id, spread = 0, hit = null;
-const LS = "pkmn-binder-progress", LSV = "pkmn-binder-view";
+const LS = "pkmn-binder-progress";
 try{ const p = JSON.parse(localStorage.getItem(LS)); if(p && p.sets) progress = p; }catch(e){}
-try{ const v = JSON.parse(localStorage.getItem(LSV)); if(v){ if(SETS.some(s=>s.id===v.setId)) setId=v.setId; spread=v.spread||0; } }catch(e){}
-
-const set = () => SETS.find(s=>s.id===setId);
-const owned = () => new Set(progress.sets[setId] || []);
-const perView = () => matchMedia("(max-width:760px)").matches ? 1 : 2;
-const pages = () => Math.ceil(set().cards.length/9);
-const maxSpread = () => Math.ceil(pages()/perView())-1;
+function saveLocal(){ try{ localStorage.setItem(LS, JSON.stringify(progress)); }catch(e){} }
 
 /* ---------- sync via a private GitHub gist (works on PCs and phone) ---------- */
 const GH="https://api.github.com", GDESC="Pokemon Binder progress", GFILE="binder-progress.json";
@@ -268,91 +359,160 @@ function syncUI(){
     b("Save backup", exportFile); b("Load backup", importFile);
   }
 }
-function saveLocal(){ try{ localStorage.setItem(LS, JSON.stringify(progress)); }catch(e){} }
-function saveView(){ try{ localStorage.setItem(LSV, JSON.stringify({setId,spread})); }catch(e){} }
 
-/* ---------- rendering ---------- */
+
+const allSets = () => SERIES.flatMap(s=>s.sets);
+const metaOf = id => allSets().find(s=>s.id===id);
+function cardsOf(id){ const m=metaOf(id); if(!m) return null; return m.local ? SETS.find(s=>s.id===id).cards : buildCards(id); }
+function stat(id){
+  const cs = cardsOf(id); if(!cs) return null;
+  const valid = new Set(cs.map(c=>c.id)), own = (progress.sets[id]||[]).filter(x=>valid.has(x)).length;
+  return { own, total: cs.length };
+}
+
+/* ---------- summary page ---------- */
+const pct = (a,b) => b ? Math.round(a/b*1000)/10 : 0;
+function renderHome(){
+  let gOwn=0, gTot=0;
+  $("serieslist").innerHTML = SERIES.map(sr=>{
+    let sOwn=0, sTot=0, pending=false;
+    const tiles = sr.sets.map(m=>{
+      const st = stat(m.id); if(st){ sOwn+=st.own; sTot+=st.total; } else pending=true;
+      const logo = m.local ? "" : (cache[m.id]&&cache[m.id].logo) || `https://assets.tcgdex.net/en/${sr.id}/${m.id}/logo`;
+      const p = st ? pct(st.own,st.total) : 0;
+      return `<a class="tile ${st&&st.total&&st.own===st.total?"done":""}" href="#set-${encodeURIComponent(m.id)}">
+        <div class="logo">${logo?`<img src="${esc(logo)}.png" alt="${esc(m.title)}" loading="lazy" onerror="this.outerHTML='<span class=alt>${esc(m.code)}</span>'">`:`<span class="alt">${esc(m.code)}</span>`}</div>
+        <div><div class="nm">${esc(m.title)}</div><div class="dt">${new Date(m.date).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}${m.sub?" · "+esc(m.sub):""} · ${esc(m.code)}</div></div>
+        <div class="prog"><div class="bar"><i style="width:${p}%"></i></div><b>${st?p+"%":"…"}</b></div>
+        <div class="sub">${st?`${st.own} / ${st.total} collected`:"Loading cards…"}</div>
+      </a>`;
+    }).join("");
+    gOwn+=sOwn; gTot+=sTot;
+    const sp = pct(sOwn,sTot);
+    return `<section class="series"><div class="serieshead"><h2><span class="eyebrow">${esc(sr.eyebrow)}</span>${esc(sr.title)}</h2>
+      <div class="stats"><div class="count">${sOwn}<span>/${sTot}${pending?"+":""}</span></div><div class="bar"><i style="width:${sp}%"></i></div><div class="count">${sp}%</div></div></div>
+      <div class="tiles">${tiles}</div></section>`;
+  }).join("");
+  const gp = pct(gOwn,gTot);
+  $("allcount").innerHTML = `${gOwn}<span>/${gTot}</span>`; $("allpct").textContent = gp+"%"; $("allbar").style.width = gp+"%";
+}
+async function loadAll(force){
+  const todo = SERIES.flatMap(s=>s.sets).filter(m=>!m.local);
+  await pool(todo, 3, async m=>{ try{ await fetchSet(m.id, force); }catch(e){} if(view==="home") renderHome(); else if(setId===m.id) renderSet(); });
+}
+
+/* ---------- binder ---------- */
+let view = "home", setId = null, spread = 0, hit = null;
+const perView = () => matchMedia("(max-width:760px)").matches ? 1 : 2;
+const curCards = () => cardsOf(setId) || [];
+const pages = () => Math.max(1, Math.ceil(curCards().length/9));
+const maxSpread = () => Math.ceil(pages()/perView())-1;
+const owned = () => new Set(progress.sets[setId] || []);
+
 function pageHTML(p, side){
-  const s=set(), own=owned(), fade=$("mode").value==="missing";
+  const cs = curCards(), own = owned(), fade = $("mode").value==="missing";
   if(p>=pages()) return `<div class="page blank ${side}">End of set</div>`;
-  const slice=s.cards.slice(p*9,p*9+9);
-  let h=`<div class="page ${side}"><div class="pagehead"><span>Page ${p+1}</span><span>${pad(slice[0].no)}–${pad(slice[slice.length-1].no)}</span></div><div class="grid">`;
+  const slice = cs.slice(p*9,p*9+9);
+  let h = `<div class="page ${side}"><div class="pagehead"><span>Page ${p+1}</span><span>${pad(slice[0].no)}–${pad(slice[slice.length-1].no)}</span></div><div class="grid">`;
   for(let k=0;k<9;k++){
-    const i=p*9+k, c=s.cards[i];
+    const i=p*9+k, c=cs[i];
     if(!c){ h+=`<div class="slot empty"></div>`; continue; }
-    const o=own.has(c.id);
-    h+=`<div class="slot ${o?"owned":""} ${hit===i?"hit":""}" style="${fade&&o?"opacity:.3":""}">
-      <button class="pocket" data-i="${i}" aria-pressed="${o}" title="${esc(c.name)} ${pad(c.no)}/${s.outOf} · ${esc(c.v)}" aria-label="${esc(c.name)} ${c.no}, ${esc(c.v)}">
-        <img src="${c.img}" alt="" loading="lazy" onerror="imgFail(this,${i})">
-        <span class="tick"></span>
-      </button>
-      <button class="zoom" data-z="${i}" aria-label="Enlarge ${esc(c.name)}">⤢</button>
-      <div class="label"><span class="vdot ${c.cls}"></span><span class="no">${pad(c.no)}</span><span class="nm">${esc(c.name)} · ${esc(c.v)}</span></div>
+    const o = own.has(c.id);
+    const inner = c.img ? `<img src="${esc(c.img)}" alt="" loading="lazy" onerror="imgFail(this,${i})">` : `<span class="fallback"><b>${pad(c.no)}</b>${esc(c.name)}<br>${esc(c.v)}</span>`;
+    h += `<div class="slot ${o?"owned":""} ${hit===i?"hit":""}" style="${fade&&o?"opacity:.3":""}">
+      <button class="pocket" data-i="${i}" aria-pressed="${o}" title="${esc(c.name)} ${pad(c.no)} · ${esc(c.v)}" aria-label="${esc(c.name)} ${c.no}, ${esc(c.v)}">${inner}<span class="tick"></span></button>
+      ${c.img?`<button class="zoom" data-z="${i}" aria-label="Enlarge ${esc(c.name)}">⤢</button>`:""}
+      <div class="label"><span class="vdot c-${c.cls||"n"}"></span><span class="no">${pad(c.no)}</span><span class="nm">${esc(c.name)} · ${esc(c.v)}</span></div>
     </div>`;
   }
-  return h+`</div></div>`;
+  return h + `</div></div>`;
 }
 function imgFail(img,i){
-  const c=set().cards[i], f=document.createElement("span");
+  const c = curCards()[i], f = document.createElement("span");
   f.className="fallback"; f.innerHTML=`<b>${pad(c.no)}</b>${esc(c.name)}<br>${esc(c.v)}`;
   img.replaceWith(f);
 }
-function render(){
-  const s=set();
-  spread=Math.max(0,Math.min(spread,maxSpread()));
-  $("settitle").textContent=s.title; $("setmeta").textContent=s.meta; document.title=s.title+" · Pokémon Binder";
-  const b=$("binder");
-  if(perView()===2){ const L=spread*2; b.innerHTML=pageHTML(L,"left")+`<div class="spine"></div>`+pageHTML(L+1,"right"); }
-  else b.innerHTML=pageHTML(spread,"left");
-  const first=spread*perView()+1, last=Math.min(pages(), first+perView()-1);
-  $("where").textContent=(first===last?`Page ${first}`:`Pages ${first}–${last}`)+` of ${pages()}`;
-  $("prev").disabled=spread===0; $("next").disabled=spread>=maxSpread();
-  const n=owned().size, total=s.cards.length, pc=Math.round(n/total*1000)/10;
-  $("count").innerHTML=`${n}<span>/${total}</span>`; $("pct").textContent=pc+"%"; $("bar").style.width=pc+"%";
-  saveView();
+function legendHTML(cs){
+  const L = {"":"Normal",holo:"Holo",rv:"Reverse holo",pb:"Ball reverse",mb:"Master Ball",en:"Energy reverse",sec:"Secret rare"};
+  if(metaOf(setId)?.local){ L.pb="Poké Ball reverse"; }
+  const seen = [...new Set(cs.map(c=>c.cls||""))];
+  return seen.map(k=>`<span><b class="c-${k||"n"}"></b>${L[k]}</span>`).join("") + `<span>Click a card to mark it collected · ← → to turn pages</span>`;
 }
-function fillSetControls(){
-  $("set").innerHTML=SETS.map(s=>`<option value="${s.id}">${esc(s.title)}</option>`).join("");
-  $("set").value=setId;
-  $("jump").innerHTML=`<option value="">Jump to…</option>`+set().jumps.map(([n,l])=>`<option value="${n}">${esc(l)}</option>`).join("");
+function renderSet(){
+  const m = metaOf(setId), cs = curCards();
+  $("settitle").textContent = m.title;
+  const loc = SETS.find(s=>s.id===setId);
+  $("setmeta").textContent = loc ? loc.meta : `${m.code} · English · ${cache[setId]?cache[setId].official+" cards + secret rares":""}`;
+  document.title = m.title + " · Pokémon Binder";
+  if(!cs.length){ $("binder").innerHTML=`<div class="loading" style="grid-column:1/-1">Loading cards from TCGdex…</div>`; $("legend").innerHTML=""; return; }
+  spread = Math.max(0, Math.min(spread, maxSpread()));
+  $("legend").innerHTML = legendHTML(cs);
+  const b = $("binder");
+  if(perView()===2){ const L=spread*2; b.innerHTML = pageHTML(L,"left")+`<div class="spine"></div>`+pageHTML(L+1,"right"); }
+  else b.innerHTML = pageHTML(spread,"left");
+  const first = spread*perView()+1, last = Math.min(pages(), first+perView()-1);
+  $("where").textContent = (first===last?`Page ${first}`:`Pages ${first}–${last}`)+` of ${pages()}`;
+  $("prev").disabled = spread===0; $("next").disabled = spread>=maxSpread();
+  const st = stat(setId), p = pct(st.own, st.total);
+  $("count").innerHTML = `${st.own}<span>/${st.total}</span>`; $("pct").textContent = p+"%"; $("bar").style.width = p+"%";
 }
-function goTo(i){ spread=Math.floor(Math.floor(i/9)/perView()); hit=i; render(); }
+function render(){ view==="home" ? renderHome() : renderSet(); }
+function goTo(i){ spread = Math.floor(Math.floor(i/9)/perView()); hit = i; renderSet(); }
+
+/* ---------- routing ---------- */
+function route(){
+  const h = decodeURIComponent(location.hash.slice(1));
+  if(h.startsWith("set-") && metaOf(h.slice(4))){
+    const id = h.slice(4);
+    if(id!==setId){ spread=0; hit=null; $("q").value=""; }
+    setId = id; view = "set";
+    const m = metaOf(id);
+    const jumps = m.local ? SETS.find(s=>s.id===id).jumps : (cache[id] ? [[1,"Main set"],[cache[id].official+1,"Secret rares"]] : []);
+    $("jump").innerHTML = `<option value="">Jump to…</option>` + jumps.map(([n,l])=>`<option value="${n}">${esc(l)}</option>`).join("");
+    $("home").hidden = true; $("setview").hidden = false;
+    if(!m.local && !cache[id]) fetchSet(id).then(()=>{ if(setId===id) route(); }).catch(()=>{ $("binder").innerHTML=`<div class="loading" style="grid-column:1/-1">Couldn't load this set from TCGdex. Check you're online and refresh.</div>`; });
+    renderSet(); window.scrollTo(0,0);
+  } else {
+    view = "home"; $("home").hidden = false; $("setview").hidden = true; document.title = "Pokémon Binder"; renderHome();
+  }
+}
+addEventListener("hashchange", route);
 
 /* ---------- events ---------- */
-$("binder").addEventListener("click",e=>{
-  const z=e.target.closest("[data-z]");
-  if(z){ const c=set().cards[+z.dataset.z]; const lb=$("lightbox");
-    lb.innerHTML=`<figure><img src="${c.img}" alt="${esc(c.name)}"><figcaption>${esc(c.name)}<small>${pad(c.no)}/${set().outOf} · ${esc(c.v)} · ${esc(c.rar)}</small></figcaption></figure>`;
-    lb.hidden=false; return; }
-  const p=e.target.closest(".pocket[data-i]"); if(!p) return;
-  const c=set().cards[+p.dataset.i], list=new Set(progress.sets[setId]||[]);
-  list.has(c.id)?list.delete(c.id):list.add(c.id);
-  progress.sets[setId]=[...list]; progress.updated=new Date().toISOString();
-  saveLocal(); writeToFile(); hit=null; render();
+$("binder").addEventListener("click", e=>{
+  const z = e.target.closest("[data-z]");
+  if(z){ const c = curCards()[+z.dataset.z], lb = $("lightbox");
+    lb.innerHTML = `<figure><img src="${esc(c.imgHi)}" alt="${esc(c.name)}"><figcaption>${esc(c.name)}<small>${pad(c.no)} · ${esc(c.v)}${c.rar?" · "+esc(c.rar):""}</small></figcaption></figure>`;
+    lb.hidden = false; return; }
+  const p = e.target.closest(".pocket[data-i]"); if(!p) return;
+  const c = curCards()[+p.dataset.i], list = new Set(progress.sets[setId]||[]);
+  list.has(c.id) ? list.delete(c.id) : list.add(c.id);
+  progress.sets[setId] = [...list]; progress.updated = new Date().toISOString();
+  saveLocal(); writeToFile(); hit = null; renderSet();
   document.querySelector(`.pocket[data-i="${p.dataset.i}"]`)?.focus();
 });
-$("lightbox").onclick=()=>{ $("lightbox").hidden=true; };
-$("prev").onclick=()=>{ spread--; hit=null; render(); };
-$("next").onclick=()=>{ spread++; hit=null; render(); };
-document.addEventListener("keydown",e=>{
-  if(e.key==="Escape") $("lightbox").hidden=true;
-  if(e.target.matches("input,textarea,select")) return;
-  if(e.key==="ArrowRight"&&spread<maxSpread()){ spread++; hit=null; render(); }
-  if(e.key==="ArrowLeft"&&spread>0){ spread--; hit=null; render(); }
+$("lightbox").onclick = () => { $("lightbox").hidden = true; };
+$("prev").onclick = () => { spread--; hit=null; renderSet(); };
+$("next").onclick = () => { spread++; hit=null; renderSet(); };
+document.addEventListener("keydown", e=>{
+  if(e.key==="Escape") $("lightbox").hidden = true;
+  if(view!=="set" || e.target.matches("input,textarea,select")) return;
+  if(e.key==="ArrowRight" && spread<maxSpread()){ spread++; hit=null; renderSet(); }
+  if(e.key==="ArrowLeft" && spread>0){ spread--; hit=null; renderSet(); }
 });
-$("q").addEventListener("input",e=>{
-  const q=e.target.value.trim().toLowerCase(); if(!q){ hit=null; render(); return; }
-  const cs=set().cards, i=/^\d+$/.test(q)?cs.findIndex(c=>c.no===+q):cs.findIndex(c=>c.name.toLowerCase().includes(q));
+$("q").addEventListener("input", e=>{
+  const q = e.target.value.trim().toLowerCase(); if(!q){ hit=null; renderSet(); return; }
+  const cs = curCards(), i = /^\d+$/.test(q) ? cs.findIndex(c=>c.no===+q) : cs.findIndex(c=>c.name.toLowerCase().includes(q));
   if(i>=0) goTo(i);
 });
-$("jump").addEventListener("change",e=>{ const n=+e.target.value; if(n) goTo(set().cards.findIndex(c=>c.no===n)); e.target.value=""; });
-$("set").addEventListener("change",e=>{ setId=e.target.value; spread=0; hit=null; fillSetControls(); render(); });
-$("mode").addEventListener("change",render);
-let lastView=perView();
-addEventListener("resize",()=>{ if(perView()!==lastView){ const p=spread*lastView; lastView=perView(); spread=Math.floor(p/lastView); render(); } });
-document.addEventListener("visibilitychange",async()=>{ if(!document.hidden && gh.token && syncState==="ok"){ try{ await pull(); render(); }catch(e){} } });
+$("jump").addEventListener("change", e=>{ const n=+e.target.value; if(n){ const i=curCards().findIndex(c=>c.no>=n); if(i>=0) goTo(i); } e.target.value=""; });
+$("mode").addEventListener("change", renderSet);
+$("refresh").onclick = async e => { e.target.disabled = true; e.target.textContent = "Refreshing…"; await loadAll(true); e.target.textContent = "Refreshed"; };
+let lastView = perView();
+addEventListener("resize", ()=>{ if(view==="set" && perView()!==lastView){ const p=spread*lastView; lastView=perView(); spread=Math.floor(p/lastView); renderSet(); } else lastView=perView(); });
+document.addEventListener("visibilitychange", async()=>{ if(!document.hidden && gh.token && syncState==="ok"){ try{ await pull(); render(); }catch(e){} } });
 
-fillSetControls(); render(); initFile();
+route(); initFile(); loadAll(false);
 </script>
 </body>
 </html>
