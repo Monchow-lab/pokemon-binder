@@ -4,6 +4,8 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Pokémon Binder</title>
+<link rel="preconnect" href="https://assets.tcgdex.net">
+<link rel="preconnect" href="https://api.tcgdex.net">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap">
 <style>
 /* Layout: summary page of series → set tiles; each set opens a two-page binder spread (3x3 pockets per page) */
@@ -102,7 +104,21 @@ details.series[open] .serieshead{margin-bottom:4px}
 .slot.owned .tick::after{content:"";width:9px;height:5px;border:2.5px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
 .zoom{position:absolute;left:6px;top:6px;width:26px;height:26px;padding:0;border-radius:6px;border:0;background:#000a;color:#fff;font-size:14px;line-height:26px;opacity:0;transition:opacity .15s}
 .slot:hover .zoom,.zoom:focus-visible{opacity:1}
-@media (hover:none){.zoom{opacity:.85}}
+.star{position:absolute;right:6px;top:6px;width:26px;height:26px;padding:0;border-radius:6px;border:0;background:#000a;color:#fff;font-size:15px;line-height:26px;opacity:0;transition:opacity .15s}
+.slot:hover .star,.star:focus-visible{opacity:1}
+@media (hover:none){.zoom,.star{opacity:.85}}
+.star.on{opacity:1;background:var(--gold);color:#fff}
+.linkbtn{display:inline-flex;align-items:center;gap:6px;text-decoration:none;font-weight:600;background:var(--pocket);border:1px solid var(--line);border-radius:8px;padding:8px 12px;white-space:nowrap}
+.linkbtn:hover{border-color:var(--muted)}
+.linkbtn b{font-family:var(--mono);color:var(--gold)}
+.srtools{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;font-size:13px;color:var(--muted)}
+.srtools select{padding:4px 8px;font-size:13px}
+.wset{display:flex;flex-direction:column;gap:10px;background:var(--page);border-radius:12px;padding:14px;border:1px solid var(--line)}
+.wset h2{font-size:1.15rem}
+.wset h2 a{text-decoration:none}
+.wset h2 a:hover{text-decoration:underline}
+.wgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(118px,1fr));gap:12px}
+.empty-note{padding:40px 16px;text-align:center;color:var(--muted);background:var(--page);border-radius:12px;border:1px dashed var(--line)}
 .label{display:flex;align-items:center;gap:5px;font-size:11px;min-width:0}
 .label .no{font-family:var(--mono);font-weight:700;font-variant-numeric:tabular-nums}
 .label .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted);flex:1;min-width:0}
@@ -130,10 +146,10 @@ details.series[open] .serieshead{margin-bottom:4px}
   <section id="home" class="wrap" style="gap:28px">
     <div class="row">
       <h1><span class="eyebrow">Monchow's collection · English TCG total</span>Pokémon Binder</h1>
-      <div class="stats"><div class="count" id="allcount"></div><div class="bar"><i id="allbar"></i></div><div class="count" id="allpct"></div></div>
+      <div class="stats"><a class="linkbtn" href="#wishlist">★ Wishlist <b class="wishn"></b></a><div class="count" id="allcount"></div><div class="bar"><i id="allbar"></i></div><div class="count" id="allpct"></div></div>
     </div>
     <div id="serieslist" class="wrap" style="gap:32px"></div>
-    <p class="note">Every print counts as its own pocket, so reverse holos and ball reverses are counted separately. English card data and images come from TCGdex, refreshed every few days (<button id="refresh" style="padding:2px 8px;font-size:12px">Refresh card data now</button>). Collect 151 images come from Bill's Archive.</p>
+    <p class="note">By default every print counts as its own pocket, so reverse holos and ball reverses are counted separately. Open a series to switch it to counting one per card, like pkmn.gg; any set can override its series. English card data and images come from TCGdex, refreshed every few days (<button id="refresh" style="padding:2px 8px;font-size:12px">Refresh card data now</button>). Collect 151 images come from Bill's Archive.</p>
   </section>
 
   <!-- ===== set binder ===== -->
@@ -149,8 +165,11 @@ details.series[open] .serieshead{margin-bottom:4px}
       <button id="imgtoggle" type="button" aria-pressed="true">Pictures: on</button>
       <select id="mode" aria-label="Show">
         <option value="all">Show every pocket</option>
-        <option value="missing">Fade what I own</option>
+        <option value="fade">Fade what I own</option>
+        <option value="only">Missing only</option>
       </select>
+      <select id="countmode" aria-label="How to count this set"></select>
+      <a class="linkbtn" href="#wishlist">★ Wishlist <b class="wishn"></b></a>
     </div>
     <div class="legend" id="legend"></div>
     <div class="binder" id="binder"></div>
@@ -159,6 +178,17 @@ details.series[open] .serieshead{margin-bottom:4px}
       <span class="where" id="where"></span>
       <button id="next" class="primary">Next →</button>
     </div>
+  </section>
+
+  <!-- ===== wishlist ===== -->
+  <section id="wishview" class="wrap" hidden>
+    <a href="#" class="back">← All sets</a>
+    <div class="row">
+      <h1><span class="eyebrow" id="wishmeta"></span>Wishlist</h1>
+      <div class="tools"><button id="wishclear" type="button">Remove collected</button></div>
+    </div>
+    <p class="note" style="margin:0">Star any card in a binder to add it here. Tick a card here once you've bought it.</p>
+    <div id="wishlist" class="wrap" style="gap:16px"></div>
   </section>
 
   <div class="sync" id="sync"><span class="dot"></span><span class="grow" id="syncmsg"></span><span id="syncbtns"></span></div>
@@ -571,11 +601,18 @@ async function initFile(){
 }
 function exportFile(){
   const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([JSON.stringify(progress,null,1)],{type:"application/json"}));
-  a.download="binder-progress.json"; a.click(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  a.download=`binder-backup-${new Date().toISOString().slice(0,10)}.json`; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  flash("Backup saved to your downloads.");
 }
 function importFile(){
   const i=document.createElement("input"); i.type="file"; i.accept=".json,application/json";
-  i.onchange=async()=>{ try{ const p=JSON.parse(await i.files[0].text()); if(!p.sets) throw 0; progress=p; progress.updated=new Date().toISOString(); saveLocal(); push(); render(); flash("Progress loaded"); }catch(e){ flash("That file isn't a binder progress file."); } };
+  i.onchange=async()=>{
+    let p; try{ p=JSON.parse(await i.files[0].text()); if(!p || typeof p.sets!=="object") throw 0; }catch(e){ flash("That file isn't a binder backup."); return; }
+    const n=Object.values(p.sets).reduce((a,l)=>a+(l||[]).length,0), w=Object.values(p.wish||{}).reduce((a,l)=>a+(l||[]).length,0);
+    const when=p.updated?new Date(p.updated).toLocaleString("en-GB",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}):"an unknown date";
+    if(!confirm(`Load this backup from ${when}?\n\nIt has ${n} ticked cards and ${w} wishlist stars. It replaces everything currently in the binder`+(gh.token?" on all your synced devices.":" on this device.")+"\n\nTip: save a backup of what you have now first if you're unsure.")) return;
+    progress=p; progress.updated=new Date().toISOString(); saveLocal(); push(); render(); flash("Backup loaded.");
+  };
   i.click();
 }
 let flashTimer=null;
@@ -597,19 +634,71 @@ function syncUI(){
     box.classList.add("warn");
     msg.innerHTML=`Ticks are only saved on this device. Paste your GitHub key to sync your PCs and phone. <input type="password" id="tok" placeholder="github_pat_…" style="font:inherit;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--pocket);color:var(--ink);width:min(260px,100%)">`;
     b("Connect", ()=>{ const t=$("tok").value; if(t.trim()) connect(t); else flash("Paste your GitHub key first."); }, true);
-    b("Save backup", exportFile); b("Load backup", importFile);
   }
+  b("Save backup", exportFile); b("Load backup", importFile);
 }
 
 
 const allSets = () => SERIES.flatMap(s=>s.sets);
 const metaOf = id => allSets().find(s=>s.id===id);
-function cardsOf(id){ const m=metaOf(id); if(!m) return null; return m.local ? SETS.find(s=>s.id===id).cards : buildCards(id); }
+const memo = {};
+function cardsOf(id){
+  const m=metaOf(id); if(!m) return null;
+  if(m.local) return SETS.find(s=>s.id===id).cards;
+  const c=cache[id]; if(!c) return null;
+  if(!memo[id] || memo[id].at!==c.at) memo[id]={at:c.at, cards:buildCards(id)};
+  return memo[id].cards;
+}
+const cardBy = (sid,cid) => (cardsOf(sid)||[]).find(c=>c.id===cid);
+const seriesIdOf = id => (SERIES.find(sr=>sr.sets.some(m=>m.id===id))||{}).id;
+
+/* ---------- how a set is counted: every version, or one per card number ---------- */
+const keyOf = c => c.lid!=null ? String(c.lid) : pad(c.no);
+const COUNT = {all:"every version", one:"one per card"};
+const seriesCount = sr => (progress.count&&progress.count.series&&progress.count.series[sr]) || "all";
+const setCountOverride = id => (progress.count&&progress.count.sets&&progress.count.sets[id]) || "";
+const countMode = id => setCountOverride(id) || seriesCount(seriesIdOf(id));
+function setCount(kind, id, val){
+  progress.count = progress.count || {series:{},sets:{}}; progress.count[kind] = progress.count[kind] || {};
+  if(!val || (kind==="series" && val==="all")) delete progress.count[kind][id]; else progress.count[kind][id] = val;
+  touch();
+}
+// "got" = cards that count as collected under the set's count mode (any version of that card number, in one-per-card mode)
+function gotOf(id){
+  const cs = cardsOf(id)||[], own = new Set(progress.sets[id]||[]);
+  if(countMode(id)!=="one") return own;
+  const keys = new Set(cs.filter(c=>own.has(c.id)).map(keyOf));
+  return new Set(cs.filter(c=>keys.has(keyOf(c))).map(c=>c.id));
+}
 function stat(id){
   const cs = cardsOf(id); if(!cs) return null;
-  const valid = new Set(cs.map(c=>c.id)), own = (progress.sets[id]||[]).filter(x=>valid.has(x)).length;
-  return { own, total: cs.length };
+  const own = new Set(progress.sets[id]||[]);
+  if(countMode(id)==="one"){
+    const all = new Set(cs.map(keyOf)), got = new Set(cs.filter(c=>own.has(c.id)).map(keyOf));
+    return { own: got.size, total: all.size };
+  }
+  return { own: cs.filter(c=>own.has(c.id)).length, total: cs.length };
 }
+
+/* ---------- ticks and wishlist stars ---------- */
+function touch(){ progress.updated = new Date().toISOString(); saveLocal(); writeToFile(); }
+function toggleOwn(sid, cid){
+  const list = new Set(progress.sets[sid]||[]);
+  list.has(cid) ? list.delete(cid) : list.add(cid);
+  progress.sets[sid] = [...list]; touch();
+}
+const wishOf = sid => new Set((progress.wish&&progress.wish[sid])||[]);
+function toggleWish(sid, cid){
+  progress.wish = progress.wish || {};
+  const list = wishOf(sid); list.has(cid) ? list.delete(cid) : list.add(cid);
+  if(list.size) progress.wish[sid] = [...list]; else delete progress.wish[sid];
+  touch();
+}
+function wishCount(){
+  let n=0; for(const [sid,l] of Object.entries(progress.wish||{})){ const own=new Set(progress.sets[sid]||[]); n += l.filter(x=>!own.has(x)).length; }
+  return n;
+}
+function wishBadge(){ const n=wishCount(); document.querySelectorAll(".wishn").forEach(el=>el.textContent=n||""); }
 
 /* ---------- summary page ---------- */
 const pct = (a,b) => b ? Math.round(a/b*1000)/10 : 0;
@@ -629,56 +718,73 @@ function renderHome(){
         <span class="badge" title="Set code ${esc(m.code)}">${PKSYM[m.id]?`<img src="https://site.pkmn.gg/images/sets/symbols/${PKSYM[m.id]}.webp" alt="" loading="lazy" onerror="this.remove()">`:""}<b>${esc(m.code)}</b></span></div>
         <div><div class="nm">${esc(m.title)}</div><div class="dt">${new Date(m.date).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}${m.sub?" · "+esc(m.sub):""} · ${esc(m.code)}</div></div>
         <div class="prog"><div class="bar"><i style="width:${p}%"></i></div><b>${st?p+"%":"…"}</b></div>
-        <div class="sub">${st?`${st.own} / ${st.total} collected`:((progress.sets[m.id]||[]).length?`${progress.sets[m.id].length} collected · `:"")+(sr.lazy&&!wanted(sr)?"open series to load":"loading cards…")}</div>
+        <div class="sub">${st?`${st.own} / ${st.total} collected${countMode(m.id)==="one"?" · one per card":""}`:((progress.sets[m.id]||[]).length?`${progress.sets[m.id].length} collected · `:"")+(sr.lazy&&!wanted(sr)?"open series to load":"loading cards…")}</div>
       </a>`;
     }).join("");
     if(sr.id!=="special"){ gOwn+=sOwn; gTot+=sTot; }
     const sp = pct(sOwn,sTot);
     return `<details class="series" data-sr="${sr.id}" ${openSeries[sr.id]?"open":""}><summary class="serieshead"><h2><span class="chev" aria-hidden="true"></span><span><span class="eyebrow">${esc(sr.eyebrow)} · ${sr.sets.length} set${sr.sets.length>1?"s":""}</span>${esc(sr.title)}</span></h2>
       <div class="stats"><div class="count">${sOwn}<span>/${sTot}${pending?"+":""}</span></div><div class="bar"><i style="width:${sp}%"></i></div><div class="count">${sp}%</div></div></summary>
+      <div class="srtools"><label>Count ${esc(sr.title)} sets <select data-count-sr="${sr.id}">${Object.entries(COUNT).map(([k,l])=>`<option value="${k}" ${seriesCount(sr.id)===k?"selected":""}>${l}</option>`).join("")}</select></label>${sr.sets.some(m=>setCountOverride(m.id))?`<span>Some sets here have their own setting.</span>`:""}</div>
       <div class="tiles">${tiles}</div></details>`;
   }).join("");
   const gp = pct(gOwn,gTot);
   $("allcount").innerHTML = `${gOwn}<span>/${gTot}</span>`; $("allpct").textContent = gp+"%"; $("allbar").style.width = gp+"%";
+  wishBadge();
 }
+$("serieslist").addEventListener("change", e=>{ const s=e.target.closest("[data-count-sr]"); if(!s) return; setCount("series", s.dataset.countSr, s.value); renderHome(); });
 const wanted = sr => !sr.lazy || openSeries[sr.id];
 async function loadSeries(sr, force){
   await pool(sr.sets.filter(m=>!m.local), 4, async m=>{ try{ await fetchSet(m.id, force); }catch(e){} if(view==="home") renderHome(); });
 }
 async function loadAll(force){
   const todo = SERIES.filter(wanted).flatMap(s=>s.sets).filter(m=>!m.local);
-  await pool(todo, 4, async m=>{ try{ await fetchSet(m.id, force); }catch(e){} if(view==="home") renderHome(); else if(setId===m.id) renderSet(); });
+  await pool(todo, 4, async m=>{ try{ await fetchSet(m.id, force); }catch(e){} if(view==="home") renderHome(); else if(view==="set" && setId===m.id) renderSet(); });
 }
 
 /* ---------- binder ---------- */
 let view = "home", setId = null, spread = 0, hit = null;
 let showImg = true; try{ showImg = localStorage.getItem("pkmn-binder-img") !== "off"; }catch(e){}
+try{ const md = localStorage.getItem("pkmn-binder-mode"); if(md && [...$("mode").options].some(o=>o.value===md)) $("mode").value = md; }catch(e){}
 const perView = () => matchMedia("(max-width:760px)").matches ? 1 : 2;
 const curCards = () => cardsOf(setId) || [];
-const pages = () => Math.max(1, Math.ceil(curCards().length/9));
+let keep = new Set();   // cards ticked while in "Missing only", kept on screen until the page is turned
+const resetKeep = () => { keep = new Set(); };
+function viewCards(){
+  const cs = curCards();
+  if($("mode").value!=="only") return cs;
+  const got = gotOf(setId);
+  return cs.filter(c=>!got.has(c.id) || keep.has(c.id));
+}
+const pages = () => Math.max(1, Math.ceil(viewCards().length/9));
 const maxSpread = () => Math.ceil(pages()/perView())-1;
-const owned = () => new Set(progress.sets[setId] || []);
 
+function pocketHTML(c, sid, own, wish, extraStyle, isHit){
+  const o = own.has(c.id), w = wish.has(c.id);
+  const inner = (c.img && showImg) ? `<img src="${esc(c.img)}" alt="" loading="lazy" decoding="async" onerror="imgFail(this)">` : `<span class="fallback"><b>${dsp(c)}</b>${esc(c.name)}<br>${esc(c.v)}</span>`;
+  return `<div class="slot ${o?"owned":""} ${isHit?"hit":""}" style="${extraStyle||""}">
+      <button class="pocket" data-s="${esc(sid)}" data-c="${esc(c.id)}" aria-pressed="${o}" title="${esc(c.name)} ${dsp(c)} · ${esc(c.v)}" aria-label="${esc(c.name)} ${c.no}, ${esc(c.v)}">${inner}<span class="tick"></span></button>
+      ${c.img?`<button class="zoom" data-zs="${esc(sid)}" data-zc="${esc(c.id)}" aria-label="Enlarge ${esc(c.name)}">⤢</button>`:""}
+      <button class="star ${w?"on":""}" data-ws="${esc(sid)}" data-wc="${esc(c.id)}" aria-pressed="${w}" aria-label="${w?"Remove from":"Add to"} wishlist" title="${w?"On your wishlist":"Add to wishlist"}">${w?"★":"☆"}</button>
+      <div class="label"><span class="vdot c-${c.cls||"n"}"></span><span class="no">${dsp(c)}</span><span class="nm">${esc(c.name)} · ${esc(c.v)}</span></div>
+    </div>`;
+}
 function pageHTML(p, side){
-  const cs = curCards(), own = owned(), fade = $("mode").value==="missing";
+  const cs = viewCards(), own = new Set(progress.sets[setId]||[]), wish = wishOf(setId), md = $("mode").value;
+  const got = md==="fade" ? gotOf(setId) : null;
+  if(!cs.length) return p===0 ? `<div class="page blank ${side}">Nothing missing here. This set is complete!</div>` : `<div class="page blank ${side}"></div>`;
   if(p>=pages()) return `<div class="page blank ${side}">End of set</div>`;
   const slice = cs.slice(p*9,p*9+9);
   let h = `<div class="page ${side}"><div class="pagehead"><span>Page ${p+1}</span><span>${dsp(slice[0])}–${dsp(slice[slice.length-1])}</span></div><div class="grid">`;
   for(let k=0;k<9;k++){
     const i=p*9+k, c=cs[i];
-    if(!c){ h+=`<div class="slot empty"></div>`; continue; }
-    const o = own.has(c.id);
-    const inner = (c.img && showImg) ? `<img src="${esc(c.img)}" alt="" loading="lazy" onerror="imgFail(this,${i})">` : `<span class="fallback"><b>${dsp(c)}</b>${esc(c.name)}<br>${esc(c.v)}</span>`;
-    h += `<div class="slot ${o?"owned":""} ${hit===i?"hit":""}" style="${fade&&o?"opacity:.3":""}">
-      <button class="pocket" data-i="${i}" aria-pressed="${o}" title="${esc(c.name)} ${dsp(c)} · ${esc(c.v)}" aria-label="${esc(c.name)} ${c.no}, ${esc(c.v)}">${inner}<span class="tick"></span></button>
-      ${c.img?`<button class="zoom" data-z="${i}" aria-label="Enlarge ${esc(c.name)}">⤢</button>`:""}
-      <div class="label"><span class="vdot c-${c.cls||"n"}"></span><span class="no">${dsp(c)}</span><span class="nm">${esc(c.name)} · ${esc(c.v)}</span></div>
-    </div>`;
+    h += c ? pocketHTML(c, setId, own, wish, got&&got.has(c.id)?"opacity:.3":"", hit===i) : `<div class="slot empty"></div>`;
   }
   return h + `</div></div>`;
 }
-function imgFail(img,i){
-  const c = curCards()[i], f = document.createElement("span");
+function imgFail(img){
+  const b = img.closest("[data-c]"), c = b && cardBy(b.dataset.s, b.dataset.c); if(!c) return;
+  const f = document.createElement("span");
   f.className="fallback"; f.innerHTML=`<b>${dsp(c)}</b>${esc(c.name)}<br>${esc(c.v)}`;
   img.replaceWith(f);
 }
@@ -686,32 +792,81 @@ function legendHTML(cs){
   const L = {"":"Normal",holo:"Holo",rv:"Reverse holo",pb:"Ball reverse",mb:"Master Ball",en:"Energy reverse",sec:"Secret rare"};
   if(metaOf(setId)?.local){ L.pb="Poké Ball reverse"; }
   const seen = [...new Set(cs.map(c=>c.cls||""))];
-  return seen.map(k=>`<span><b class="c-${k||"n"}"></b>${L[k]}</span>`).join("") + `<span>Click a card to mark it collected · ← → to turn pages</span>`;
+  return seen.map(k=>`<span><b class="c-${k||"n"}"></b>${L[k]}</span>`).join("") + `<span>Click a card to mark it collected · ☆ adds it to your wishlist · ← → to turn pages</span>`;
+}
+// quietly fetch the pictures for the next pages so turning the page is instant
+let preloadTimer = null;
+function preloadNext(){
+  clearTimeout(preloadTimer);
+  if(!showImg) return;
+  preloadTimer = setTimeout(()=>{
+    const cs = viewCards(), from = (spread+1)*perView()*9;
+    cs.slice(from, from+perView()*9).forEach(c=>{ if(c.img){ const im = new Image(); im.decoding="async"; im.src = c.img; } });
+  }, 600);
+}
+function countSelect(){
+  const sr = SERIES.find(s=>s.id===seriesIdOf(setId)), d = COUNT[seriesCount(sr.id)];
+  $("countmode").innerHTML = `<option value="">Count: ${d} (series)</option>` + Object.entries(COUNT).map(([k,l])=>`<option value="${k}">Count: ${l} (this set)</option>`).join("");
+  $("countmode").value = setCountOverride(setId);
 }
 function renderSet(){
-  const m = metaOf(setId), cs = curCards();
+  const m = metaOf(setId), all = curCards();
   $("settitle").textContent = m.title;
   const loc = SETS.find(s=>s.id===setId);
   $("setmeta").textContent = loc ? loc.meta : `${m.code} · English · ${cache[setId]?(cache[setId].official<cache[setId].rows.length?cache[setId].official+" cards + secret rares":cache[setId].rows.length+" cards"):""}`;
   document.title = m.title + " · Pokémon Binder";
-  if(!cs.length){ $("binder").innerHTML=`<div class="loading" style="grid-column:1/-1">Loading cards from TCGdex…</div>`; $("legend").innerHTML=""; return; }
+  countSelect(); wishBadge();
+  if(!all.length){ $("binder").innerHTML=`<div class="loading" style="grid-column:1/-1">Loading cards from TCGdex…</div>`; $("legend").innerHTML=""; return; }
   spread = Math.max(0, Math.min(spread, maxSpread()));
-  $("legend").innerHTML = legendHTML(cs);
+  $("legend").innerHTML = legendHTML(all);
   const b = $("binder");
   if(perView()===2){ const L=spread*2; b.innerHTML = pageHTML(L,"left")+`<div class="spine"></div>`+pageHTML(L+1,"right"); }
   else b.innerHTML = pageHTML(spread,"left");
   const first = spread*perView()+1, last = Math.min(pages(), first+perView()-1);
-  $("where").textContent = (first===last?`Page ${first}`:`Pages ${first}–${last}`)+` of ${pages()}`;
+  const only = $("mode").value==="only";
+  $("where").textContent = (first===last?`Page ${first}`:`Pages ${first}–${last}`)+` of ${pages()}` + (only ? ` · ${viewCards().filter(c=>!keep.has(c.id)).length} missing` : "");
   $("prev").disabled = spread===0; $("next").disabled = spread>=maxSpread();
   const st = stat(setId), p = pct(st.own, st.total);
   $("count").innerHTML = `${st.own}<span>/${st.total}</span>`; $("pct").textContent = p+"%"; $("bar").style.width = p+"%";
+  preloadNext();
 }
-function render(){ view==="home" ? renderHome() : renderSet(); }
+
+/* ---------- wishlist page ---------- */
+const wishLoading = new Set();
+function renderWish(){
+  document.title = "Wishlist · Pokémon Binder";
+  const order = allSets().map(m=>m.id), sids = Object.keys(progress.wish||{}).filter(s=>metaOf(s)).sort((a,b)=>order.indexOf(a)-order.indexOf(b));
+  let want=0, done=0;
+  const blocks = sids.map(sid=>{
+    const m = metaOf(sid), cs = cardsOf(sid), wish = wishOf(sid), own = new Set(progress.sets[sid]||[]);
+    if(!cs){
+      if(!wishLoading.has(sid)){ wishLoading.add(sid); fetchSet(sid).catch(()=>{}).then(()=>{ if(view==="wish") renderWish(); }); }
+      want += wish.size;
+      return `<div class="wset"><h2><a href="#set-${encodeURIComponent(sid)}">${esc(m.title)}</a> <span class="eyebrow" style="display:inline">${esc(m.code)}</span></h2><div class="note">Loading ${wish.size} card${wish.size>1?"s":""}…</div></div>`;
+    }
+    const list = cs.filter(c=>wish.has(c.id));
+    list.forEach(c=>own.has(c.id)?done++:want++);
+    return `<div class="wset"><h2><a href="#set-${encodeURIComponent(sid)}">${esc(m.title)}</a> <span class="eyebrow" style="display:inline">${esc(m.code)} · ${list.length}</span></h2>
+      <div class="wgrid">${list.map(c=>pocketHTML(c, sid, own, wish, "", false)).join("")}</div></div>`;
+  });
+  $("wishmeta").textContent = `${want} still to find` + (done ? ` · ${done} collected` : "");
+  $("wishclear").hidden = !done; $("wishclear").textContent = `Remove ${done} collected`;
+  $("wishlist").innerHTML = blocks.length ? blocks.join("") : `<div class="empty-note">Your wishlist is empty. Open any set and tap the ☆ on a card to add it.</div>`;
+  wishBadge();
+}
+$("wishclear").onclick = () => {
+  for(const [sid,l] of Object.entries(progress.wish||{})){ const own=new Set(progress.sets[sid]||[]); const left=l.filter(x=>!own.has(x)); if(left.length) progress.wish[sid]=left; else delete progress.wish[sid]; }
+  touch(); renderWish();
+};
+
+function render(){ view==="home" ? renderHome() : view==="wish" ? renderWish() : renderSet(); }
 function goTo(i){ spread = Math.floor(Math.floor(i/9)/perView()); hit = i; renderSet(); }
 
 /* ---------- routing ---------- */
+function show(which){ $("home").hidden = which!=="home"; $("setview").hidden = which!=="set"; $("wishview").hidden = which!=="wish"; }
 function route(){
   const h = decodeURIComponent(location.hash.slice(1));
+  resetKeep();
   if(h.startsWith("set-") && metaOf(h.slice(4))){
     const id = h.slice(4);
     if(id!==setId){ spread=0; hit=null; $("q").value=""; }
@@ -719,45 +874,54 @@ function route(){
     const m = metaOf(id);
     const jumps = m.local ? SETS.find(s=>s.id===id).jumps : (cache[id] ? (cache[id].official < cache[id].rows.length ? [[1,"Main set"],[cache[id].official+1,"Secret rares"]] : [[1,"Start"]]) : []);
     $("jump").innerHTML = `<option value="">Jump to…</option>` + jumps.map(([n,l])=>`<option value="${n}">${esc(l)}</option>`).join("");
-    $("home").hidden = true; $("setview").hidden = false;
+    show("set");
     if(!m.local && !cache[id]) fetchSet(id).then(()=>{ if(setId===id) route(); }).catch(()=>{ $("binder").innerHTML=`<div class="loading" style="grid-column:1/-1">Couldn't load this set from TCGdex. Check you're online and refresh.</div>`; });
     renderSet(); window.scrollTo(0,0);
+  } else if(h==="wishlist"){
+    view = "wish"; show("wish"); renderWish(); window.scrollTo(0,0);
   } else {
-    view = "home"; $("home").hidden = false; $("setview").hidden = true; document.title = "Pokémon Binder"; renderHome();
+    view = "home"; show("home"); document.title = "Pokémon Binder"; renderHome();
   }
 }
 addEventListener("hashchange", route);
 document.addEventListener("toggle", e=>{ const d=e.target; if(!d.matches || !d.matches("details.series")) return; openSeries[d.dataset.sr]=d.open; if(d.open){ const sr=SERIES.find(x=>x.id===d.dataset.sr); if(sr && sr.sets.some(m=>!m.local && !cache[m.id])) loadSeries(sr); } try{ localStorage.setItem("pkmn-binder-open", JSON.stringify(openSeries)); }catch(err){} }, true);
 
-/* ---------- events ---------- */
-$("binder").addEventListener("click", e=>{
-  const z = e.target.closest("[data-z]");
-  if(z){ const c = curCards()[+z.dataset.z], lb = $("lightbox");
+/* ---------- events (binder and wishlist share the same pockets) ---------- */
+function pocketClick(e){
+  const z = e.target.closest("[data-zc]");
+  if(z){ const c = cardBy(z.dataset.zs, z.dataset.zc), lb = $("lightbox"); if(!c) return;
     lb.innerHTML = `<figure><img src="${esc(c.imgHi)}" alt="${esc(c.name)}"><figcaption>${esc(c.name)}<small>${dsp(c)} · ${esc(c.v)}${c.rar?" · "+esc(c.rar):""}</small></figcaption></figure>`;
     lb.hidden = false; return; }
-  const p = e.target.closest(".pocket[data-i]"); if(!p) return;
-  const c = curCards()[+p.dataset.i], list = new Set(progress.sets[setId]||[]);
-  list.has(c.id) ? list.delete(c.id) : list.add(c.id);
-  progress.sets[setId] = [...list]; progress.updated = new Date().toISOString();
-  saveLocal(); writeToFile(); hit = null; renderSet();
-  document.querySelector(`.pocket[data-i="${p.dataset.i}"]`)?.focus();
-});
+  const w = e.target.closest("[data-wc]");
+  if(w){ toggleWish(w.dataset.ws, w.dataset.wc); view==="wish" ? renderWish() : renderSet();
+    document.querySelector(`.star[data-ws="${CSS.escape(w.dataset.ws)}"][data-wc="${CSS.escape(w.dataset.wc)}"]`)?.focus(); return; }
+  const p = e.target.closest(".pocket[data-c]"); if(!p) return;
+  const sid = p.dataset.s, cid = p.dataset.c;
+  toggleOwn(sid, cid);
+  if(view==="set" && $("mode").value==="only") keep.add(cid);
+  hit = null; view==="wish" ? renderWish() : renderSet();
+  document.querySelector(`.pocket[data-s="${CSS.escape(sid)}"][data-c="${CSS.escape(cid)}"]`)?.focus();
+}
+$("binder").addEventListener("click", pocketClick);
+$("wishlist").addEventListener("click", pocketClick);
 $("lightbox").onclick = () => { $("lightbox").hidden = true; };
-$("prev").onclick = () => { spread--; hit=null; renderSet(); };
-$("next").onclick = () => { spread++; hit=null; renderSet(); };
+const turn = d => { spread += d; hit = null; resetKeep(); renderSet(); };
+$("prev").onclick = () => turn(-1);
+$("next").onclick = () => turn(1);
 document.addEventListener("keydown", e=>{
   if(e.key==="Escape") $("lightbox").hidden = true;
   if(view!=="set" || e.target.matches("input,textarea,select")) return;
-  if(e.key==="ArrowRight" && spread<maxSpread()){ spread++; hit=null; renderSet(); }
-  if(e.key==="ArrowLeft" && spread>0){ spread--; hit=null; renderSet(); }
+  if(e.key==="ArrowRight" && spread<maxSpread()) turn(1);
+  if(e.key==="ArrowLeft" && spread>0) turn(-1);
 });
 $("q").addEventListener("input", e=>{
   const q = e.target.value.trim().toLowerCase(); if(!q){ hit=null; renderSet(); return; }
-  const cs = curCards(), i = /^\d+$/.test(q) ? cs.findIndex(c=>c.no===+q) : cs.findIndex(c=>c.name.toLowerCase().includes(q));
+  const cs = viewCards(), i = /^\d+$/.test(q) ? cs.findIndex(c=>c.no===+q) : cs.findIndex(c=>c.name.toLowerCase().includes(q));
   if(i>=0) goTo(i);
 });
-$("jump").addEventListener("change", e=>{ const n=+e.target.value; if(n){ const i=curCards().findIndex(c=>c.no>=n); if(i>=0) goTo(i); } e.target.value=""; });
-$("mode").addEventListener("change", renderSet);
+$("jump").addEventListener("change", e=>{ const n=+e.target.value; if(n){ const i=viewCards().findIndex(c=>c.no>=n); if(i>=0) goTo(i); } e.target.value=""; });
+$("mode").addEventListener("change", e=>{ try{ localStorage.setItem("pkmn-binder-mode", e.target.value); }catch(err){} spread=0; hit=null; resetKeep(); renderSet(); });
+$("countmode").addEventListener("change", e=>{ setCount("sets", setId, e.target.value); resetKeep(); renderSet(); });
 const imgBtn = () => { $("imgtoggle").textContent = "Pictures: " + (showImg ? "on" : "off"); $("imgtoggle").setAttribute("aria-pressed", String(showImg)); };
 $("imgtoggle").onclick = () => { showImg = !showImg; try{ localStorage.setItem("pkmn-binder-img", showImg ? "on" : "off"); }catch(e){} imgBtn(); renderSet(); };
 imgBtn();
