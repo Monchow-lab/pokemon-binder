@@ -146,6 +146,7 @@ details.series[open] .serieshead{margin-bottom:4px}
     <div class="tools">
       <input type="search" id="q" placeholder="Find a card: name or number, e.g. Gengar or 094">
       <select id="jump" aria-label="Jump to section"></select>
+      <button id="imgtoggle" type="button" aria-pressed="true">Pictures: on</button>
       <select id="mode" aria-label="Show">
         <option value="all">Show every pocket</option>
         <option value="missing">Fade what I own</option>
@@ -651,6 +652,7 @@ async function loadAll(force){
 
 /* ---------- binder ---------- */
 let view = "home", setId = null, spread = 0, hit = null;
+let showImg = true; try{ showImg = localStorage.getItem("pkmn-binder-img") !== "off"; }catch(e){}
 const perView = () => matchMedia("(max-width:760px)").matches ? 1 : 2;
 const curCards = () => cardsOf(setId) || [];
 const pages = () => Math.max(1, Math.ceil(curCards().length/9));
@@ -666,7 +668,7 @@ function pageHTML(p, side){
     const i=p*9+k, c=cs[i];
     if(!c){ h+=`<div class="slot empty"></div>`; continue; }
     const o = own.has(c.id);
-    const inner = c.img ? `<img src="${esc(c.img)}" alt="" loading="lazy" onerror="imgFail(this,${i})">` : `<span class="fallback"><b>${dsp(c)}</b>${esc(c.name)}<br>${esc(c.v)}</span>`;
+    const inner = (c.img && showImg) ? `<img src="${esc(c.img)}" alt="" loading="lazy" onerror="imgFail(this,${i})">` : `<span class="fallback"><b>${dsp(c)}</b>${esc(c.name)}<br>${esc(c.v)}</span>`;
     h += `<div class="slot ${o?"owned":""} ${hit===i?"hit":""}" style="${fade&&o?"opacity:.3":""}">
       <button class="pocket" data-i="${i}" aria-pressed="${o}" title="${esc(c.name)} ${dsp(c)} · ${esc(c.v)}" aria-label="${esc(c.name)} ${c.no}, ${esc(c.v)}">${inner}<span class="tick"></span></button>
       ${c.img?`<button class="zoom" data-z="${i}" aria-label="Enlarge ${esc(c.name)}">⤢</button>`:""}
@@ -756,6 +758,9 @@ $("q").addEventListener("input", e=>{
 });
 $("jump").addEventListener("change", e=>{ const n=+e.target.value; if(n){ const i=curCards().findIndex(c=>c.no>=n); if(i>=0) goTo(i); } e.target.value=""; });
 $("mode").addEventListener("change", renderSet);
+const imgBtn = () => { $("imgtoggle").textContent = "Pictures: " + (showImg ? "on" : "off"); $("imgtoggle").setAttribute("aria-pressed", String(showImg)); };
+$("imgtoggle").onclick = () => { showImg = !showImg; try{ localStorage.setItem("pkmn-binder-img", showImg ? "on" : "off"); }catch(e){} imgBtn(); renderSet(); };
+imgBtn();
 $("refresh").onclick = async e => { e.target.disabled = true; e.target.textContent = "Refreshing…"; await loadAll(true); e.target.textContent = "Refreshed"; };
 let lastView = perView();
 addEventListener("resize", ()=>{ if(view==="set" && perView()!==lastView){ const p=spread*lastView; lastView=perView(); spread=Math.floor(p/lastView); renderSet(); } else lastView=perView(); });
