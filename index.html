@@ -241,6 +241,8 @@ const SERIES = [
 
 /* ---------- English card data from TCGdex ---------- */
 const TCG = "https://api.tcgdex.net/v2/en";
+const PKSYM = {"me06":"me06","30th":"cel30","30th-c":"cel30c","me05":"me05","me04":"me04","me03":"me03","me02.5":"me02pt5","me02":"me02","me01":"me01","mep":"MEP","mee":"mee",
+  "sv10.5w":"sv10pt5_wht","sv10.5b":"sv10pt5_blk","sv10":"sv10","sv09":"sv9","sv08.5":"sv8pt5","sv08":"sv8","sv07":"sv7","sv06.5":"sv6pt5","sv06":"sv6","sv05":"sv5","sv04.5":"sv4pt5","sv04":"sv4","sv03.5":"sv3pt5","sv03":"sv3","sv02":"sv2","sv01":"sv1","svp":"svp","sve":"sve23"};
 const seriesOf = id => (SERIES.find(sr=>sr.sets.some(m=>m.id===id))||{id:"me"}).id;
 const CACHE = "pkmn-binder-cards-v2", CACHE_DAYS = 3;
 const FOIL = {"":"Reverse holo",pokeball:"Poké Ball",masterball:"Master Ball",energy:"Energy reverse",friendball:"Friend Ball",loveball:"Love Ball",quickball:"Quick Ball",duskball:"Dusk Ball","team-rocket":"Team Rocket"};
@@ -410,7 +412,7 @@ function renderHome(){
       const p = st ? pct(st.own,st.total) : 0;
       return `<a class="tile ${st&&st.total&&st.own===st.total?"done":""}" href="#set-${encodeURIComponent(m.id)}">
         <div class="top"><div class="logo">${logo?`<img src="${esc(logo)}.png" alt="${esc(m.title)}" loading="lazy" onerror="this.outerHTML='<span class=alt>${esc(m.title)}</span>'">`:`<span class="alt">${esc(m.title)}</span>`}</div>
-        <span class="badge" title="Set code ${esc(m.code)}">${m.local?"":`<img src="https://assets.tcgdex.net/univ/${sr.id}/${m.id}/symbol.png" alt="" loading="lazy" onerror="this.remove()">`}<b>${esc(m.code)}</b></span></div>
+        <span class="badge" title="Set code ${esc(m.code)}">${PKSYM[m.id]?`<img src="https://site.pkmn.gg/images/sets/symbols/${PKSYM[m.id]}.webp" alt="" loading="lazy" onerror="this.remove()">`:""}<b>${esc(m.code)}</b></span></div>
         <div><div class="nm">${esc(m.title)}</div><div class="dt">${new Date(m.date).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}${m.sub?" · "+esc(m.sub):""} · ${esc(m.code)}</div></div>
         <div class="prog"><div class="bar"><i style="width:${p}%"></i></div><b>${st?p+"%":"…"}</b></div>
         <div class="sub">${st?`${st.own} / ${st.total} collected`:"Loading cards…"}</div>
