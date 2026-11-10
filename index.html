@@ -200,7 +200,7 @@ const SERIES = [
   { id:"me", title:"Mega Evolution", eyebrow:"English TCG", sets:[
     {id:"me06",   title:"Delta Reign",                     code:"DLR",  date:"2026-11-06"},
     {id:"30th",   title:"30th Celebration",                code:"30C",  date:"2026-09-16"},
-    {id:"30th-c", title:"30th Anniversary: Classic Collection", code:"30CC", date:"2026-09-16"},
+    {id:"30th-c", title:"30th Anniversary: Classic Collection", code:"30CC", date:"2026-09-16", logo:"https://assets.tcgdex.net/en/me/30th/logo"},
     {id:"me05",   title:"Pitch Black",                     code:"PBL",  date:"2026-07-17"},
     {id:"me04",   title:"Chaos Rising",                    code:"CRI",  date:"2026-05-22"},
     {id:"me03",   title:"Perfect Order",                   code:"POR",  date:"2026-03-27"},
@@ -381,7 +381,7 @@ function renderHome(){
     let sOwn=0, sTot=0, pending=false;
     const tiles = sr.sets.map(m=>{
       const st = stat(m.id); if(st){ sOwn+=st.own; sTot+=st.total; } else pending=true;
-      const logo = m.local ? "" : (cache[m.id]&&cache[m.id].logo) || `https://assets.tcgdex.net/en/${sr.id}/${m.id}/logo`;
+      const logo = m.local ? "" : m.logo || (cache[m.id]&&cache[m.id].logo) || `https://assets.tcgdex.net/en/${sr.id}/${m.id}/logo`;
       const p = st ? pct(st.own,st.total) : 0;
       return `<a class="tile ${st&&st.total&&st.own===st.total?"done":""}" href="#set-${encodeURIComponent(m.id)}">
         <div class="logo">${logo?`<img src="${esc(logo)}.png" alt="${esc(m.title)}" loading="lazy" onerror="this.outerHTML='<span class=alt>${esc(m.code)}</span>'">`:`<span class="alt">${esc(m.code)}</span>`}</div>
