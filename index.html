@@ -149,7 +149,7 @@ details.series[open] .serieshead{margin-bottom:4px}
       <div class="stats"><a class="linkbtn" href="#wishlist">★ Wishlist <b class="wishn"></b></a><div class="count" id="allcount"></div><div class="bar"><i id="allbar"></i></div><div class="count" id="allpct"></div></div>
     </div>
     <div id="serieslist" class="wrap" style="gap:32px"></div>
-    <p class="note">By default every print counts as its own pocket, so reverse holos and ball reverses are counted separately. Open a series to switch it to counting one per card, like pkmn.gg; any set can override its series. English card data and images come from TCGdex, refreshed every few days (<button id="refresh" style="padding:2px 8px;font-size:12px">Refresh card data now</button>). Collect 151 images come from Bill's Archive.</p>
+    <p class="note">By default every print counts as its own pocket, so reverse holos and ball reverses are counted separately. Open a series to switch it to counting one per card, like pkmn.gg; any set can override its series. English card data and images come from TCGdex; the card lists are rebuilt every night (<button id="refresh" style="padding:2px 8px;font-size:12px">Refresh card data now</button>). Collect 151 images come from Bill's Archive.</p>
   </section>
 
   <!-- ===== set binder ===== -->
@@ -483,19 +483,34 @@ const TCG = "https://api.tcgdex.net/v2/en";
 const PKSYM = {"me06":"me06","30th":"cel30","30th-c":"cel30c","me05":"me05","me04":"me04","me03":"me03","me02.5":"me02pt5","me02":"me02","me01":"me01","mep":"MEP","mee":"mee",
   "sv10.5w":"sv10pt5_wht","sv10.5b":"sv10pt5_blk","sv10":"sv10","sv09":"sv9","sv08.5":"sv8pt5","sv08":"sv8","sv07":"sv7","sv06.5":"sv6pt5","sv06":"sv6","sv05":"sv5","sv04.5":"sv4pt5","sv04":"sv4","sv03.5":"sv3pt5","sv03":"sv3","sv02":"sv2","sv01":"sv1","svp":"svp","sve":"sve23","swsh12.5gg":"swsh12pt5gg","swsh12.5":"swsh12pt5","swsh12tg":"swsh12tg","swsh12":"swsh12","swsh11tg":"swsh11tg","swsh11":"swsh11","swsh10.5":"pgo","swsh10tg":"swsh10tg","swsh10":"swsh10","swsh9tg":"swsh9tg","swsh9":"swsh9","swsh8":"swsh8","cel25cc":"cel25c","cel25":"cel25","swsh7":"swsh7","swsh6":"swsh6","swsh5":"swsh5","swsh4.5sv":"swsh45sv","swsh4.5":"swsh45","swsh4":"swsh4","swsh3.5":"swsh35","swsh3":"swsh3","swsh2":"swsh2","swsh1":"swsh1","swshp":"swshp","sm12":"sm12","sma":"sma","sm115":"sm115","sm11":"sm11","sm10":"sm10","det1":"det1","sm9":"sm9","sm8":"sm8","sm7.5":"sm75","sm7":"sm7","sm6":"sm6","sm5":"sm5","sm4":"sm4","sm3.5":"sm35","sm3":"sm3","sm2":"sm2","tk-sm-r":"tk10b","tk-sm-l":"tk10a","smp":"smp","sm1":"sm1","xy12":"xy12","xy11":"xy11","xy10":"xy10","tk-xy-p":"tk9a","tk-xy-su":"tk9b","g1":"g1","xy9":"xy9","xy8":"xy8","xy7":"xy7","xy6":"xy6","tk-xy-latia":"tk8b","tk-xy-latio":"tk8a","dc1":"dc1","xy5":"xy5","xy4":"xy4","tk-xy-w":"tk7b","tk-xy-b":"tk7a","xy3":"xy3","xy2":"xy2","tk-xy-n":"tk6a","tk-xy-sy":"tk6b","xy1":"xy1","xy0":"xy0","xyp":"xyp","bw11":"bw11","bw10":"bw10","bw9":"bw9","bw8":"bw8","bw7":"bw7","dv1":"dv1","bw6":"bw6","bw5":"bw5","bw4":"bw4","bw3":"bw3","tk-bw-e":"tk5b","tk-bw-z":"tk5a","bw2":"bw2","bwp":"bwp","bw1":"bw1","col1":"col1","hgss4":"hgss4","hgss3":"hgss3","hgss2":"hgss2","tk-hs-g":"tk4a","tk-hs-r":"tk4b","hgssp":"hsp","hgss1":"hgss1","ru1":"ru1","pl4":"pl4","pl3":"pl3","pl2":"pl2","pl1":"pl1","dp7":"dp7","dp6":"dp6","dp5":"dp5","dp4":"dp4","dp3":"dp3","tk-dp-m":"tk3a","tk-dp-l":"tk3b","dp2":"dp2","dpp":"dpp","dp1":"dp1","pop9":"pop9","pop8":"pop8","pop7":"pop7","pop6":"pop6","pop5":"pop5","pop4":"pop4","pop3":"pop3","pop2":"pop2","pop1":"pop1","np":"np","ex16":"ex16","ex15":"ex15","ex14":"ex14","ex13":"ex13","tk-ex-m":"tk2b","tk-ex-p":"tk2a","ex12":"ex12","ex11":"ex11","ex10":"ex10","ex9":"ex9","ex8":"ex8","ex7":"ex7","ex6":"ex6","tk-ex-latia":"tk1a","tk-ex-latio":"tk1b","ex5":"ex5","ex4":"ex4","ex3":"ex3","ex2":"ex2","ex1":"ex1","ecard3":"ecard3","ecard2":"ecard2","bog":"bp","ecard1":"ecard1","lc":"base6","neo4":"neo4","neo3":"neo3","si1":"si1","neo2":"neo2","neo1":"neo1","gym2":"gym2","gym1":"gym1","base5":"base5","base4":"base4","base3":"base3","basep":"basep","base2":"base2","base1":"base1","2024sv":"mcd24","2023sv":"mcd23","2022swsh":"mcd22","2021swsh":"mcd21","fut2020":"fut20","2019sm":"mcd19","2018sm":"mcd18","2017sm":"mcd17","2016xy":"mcd16","2015xy":"mcd15","2014xy":"mcd14","2012bw":"mcd12","2011bw":"mcd11"};
 const seriesOf = id => { const sr = SERIES.find(sr=>sr.sets.some(m=>m.id===id))||{id:"me",sets:[]}; const m = sr.sets.find(m=>m.id===id); return (m&&m.ts) || sr.ts || sr.id; };
-const CACHE = "pkmn-binder-cards-v3", CACHE_DAYS = 3;
+const LIVE = "pkmn-binder-cards-live", CACHE_DAYS = 3;
 const FOIL = {"":"Reverse holo",pokeball:"Poké Ball",masterball:"Master Ball",energy:"Energy reverse",friendball:"Friend Ball",loveball:"Love Ball",quickball:"Quick Ball",duskball:"Dusk Ball","team-rocket":"Team Rocket"};
 const RARE = {"common":"C","uncommon":"U","rare":"R","double rare":"RR","illustration rare":"IR","ultra rare":"UR","special illustration rare":"SIR","mega hyper rare":"MHR","mega attack rare":"MAR","hyper rare":"HR","shiny rare":"SR","none":""};
-let cache = {};
-try{ localStorage.removeItem("pkmn-binder-cards-v1"); localStorage.removeItem("pkmn-binder-cards-v2"); }catch(e){}
-try{ cache = JSON.parse(localStorage.getItem(CACHE)) || {}; }catch(e){}
-const saveCache = () => { try{ localStorage.setItem(CACHE, JSON.stringify(cache)); }catch(e){} };
+// Card lists come from data/cards.json, rebuilt every night on GitHub (scripts/build-cards.mjs).
+// Only a set that isn't in that file yet is fetched live from TCGdex, and only that set is kept in phone storage.
+let cache = {}, live = {}, bundleBuilt = null;
+try{ ["pkmn-binder-cards-v1","pkmn-binder-cards-v2","pkmn-binder-cards-v3"].forEach(k=>localStorage.removeItem(k)); }catch(e){}
+try{ live = JSON.parse(localStorage.getItem(LIVE)) || {}; }catch(e){}
+Object.assign(cache, live);
+const saveCache = () => { try{ localStorage.setItem(LIVE, JSON.stringify(live)); }catch(e){} };
+async function loadBundle(force){
+  try{
+    const d = await fetch("data/cards.json", force ? {cache:"no-cache"} : {}).then(r=>r.ok?r.json():null);
+    if(!d || !d.sets) return false;
+    for(const [id,v] of Object.entries(d.sets)){
+      if(live[id] && live[id].at > v.at) continue;      // a newer live copy wins
+      v.bundled = true; cache[id] = v; delete live[id];
+    }
+    saveCache(); bundleBuilt = d.built; return true;
+  }catch(e){ return false; }
+}
+const bundleReady = loadBundle();
 
 async function pool(items, n, fn){ let i=0; await Promise.all(Array.from({length:n}, async()=>{ while(i<items.length){ const k=i++; await fn(items[k],k); } })); }
 
 async function fetchSet(id, force){
   const c = cache[id];
-  if(!force && c && Date.now()-c.at < CACHE_DAYS*864e5) return c;
+  if(!force && c && (c.bundled || Date.now()-c.at < CACHE_DAYS*864e5)) return c;
   const st = await fetch(`${TCG}/sets/${encodeURIComponent(id)}`).then(r=>{ if(!r.ok) throw r.status; return r.json(); });
   const rows = new Array(st.cards.length);
   await pool(st.cards, 10, async (c,k)=>{
@@ -510,7 +525,7 @@ async function fetchSet(id, force){
     if(!vs.length) vs.push("n");
     rows[k] = [c.localId, c.name, d.rarity||"", vs];
   });
-  cache[id] = { at:Date.now(), official:(st.cardCount&&st.cardCount.official)||rows.length+999, logo:st.logo||"", rows };
+  cache[id] = live[id] = { at:Date.now(), official:(st.cardCount&&st.cardCount.official)||rows.length+999, logo:st.logo||"", rows };
   saveCache();
   return cache[id];
 }
@@ -549,7 +564,9 @@ function saveLocal(){ try{ localStorage.setItem(LS, JSON.stringify(progress)); }
 
 /* ---------- sync via a private GitHub gist (works on PCs and phone) ---------- */
 const GH="https://api.github.com", GDESC="Pokemon Binder progress", GFILE="binder-progress.json";
-let gh={token:null,gist:null}, syncState="off"; // off | ok | saving | error
+let gh={token:null,gist:null}, syncState="off", keyRejected=false; // off | ok | saving | error
+const homeScreen = () => !!(navigator.standalone || (window.matchMedia && matchMedia("(display-mode: standalone)").matches));
+function rejectKey(){ gh={token:null,gist:null}; saveGh(); syncState="off"; keyRejected=true; syncUI(); }
 try{ const g=JSON.parse(localStorage.getItem("pkmn-binder-gh")); if(g&&g.token) gh=g; }catch(e){}
 const saveGh=()=>{ try{ localStorage.setItem("pkmn-binder-gh",JSON.stringify(gh)); }catch(e){} };
 async function api(path,opts={}){
@@ -582,21 +599,21 @@ function push(){
   clearTimeout(pushTimer); syncState="saving"; syncUI();
   pushTimer=setTimeout(async()=>{
     try{ await api("/gists/"+gh.gist,{method:"PATCH",body:JSON.stringify({files:{[GFILE]:{content:JSON.stringify(progress,null,1)}}})}); syncState="ok"; }
-    catch(e){ syncState="error"; }
+    catch(e){ if(e.status===401) return rejectKey(); syncState="error"; }
     syncUI();
   },800);
 }
 const writeToFile=push;
 async function connect(token){
   gh={token:token.trim(),gist:null};
-  try{ gh.gist=await findOrCreateGist(); saveGh(); await pull(); syncState="ok"; render(); }
+  try{ gh.gist=await findOrCreateGist(); saveGh(); await pull(); syncState="ok"; keyRejected=false; render(); }
   catch(e){ gh={token:null,gist:null}; syncState="off"; flash(e.status===401?"GitHub didn't accept that key. Check you copied all of it and that it has Gists read and write access.":"Couldn't reach GitHub. Check you're online and try again."); return; }
   syncUI();
 }
 async function initFile(){
   if(!gh.token){ syncUI(); return; }
   try{ if(!gh.gist){ gh.gist=await findOrCreateGist(); saveGh(); } await pull(); syncState="ok"; render(); }
-  catch(e){ syncState="error"; }
+  catch(e){ if(e.status===401) return rejectKey(); syncState="error"; }
   syncUI();
 }
 function exportFile(){
@@ -632,7 +649,10 @@ function syncUI(){
     b("Try again", initFile, true);
   } else {
     box.classList.add("warn");
-    msg.innerHTML=`Ticks are only saved on this device. Paste your GitHub key to sync your PCs and phone. <input type="password" id="tok" placeholder="github_pat_…" style="font:inherit;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--pocket);color:var(--ink);width:min(260px,100%)">`;
+    const why = keyRejected ? "GitHub stopped accepting the saved key, probably because it expired. Make a new key on GitHub and paste it here."
+      : homeScreen() ? "This home-screen app keeps its own storage, separate from Safari, so it needs your GitHub key once here too. After that it stays connected."
+      : "Ticks are only saved on this device. Paste your GitHub key to sync your PCs and phone.";
+    msg.innerHTML=`${why} <input type="password" id="tok" placeholder="github_pat_…" style="font:inherit;padding:6px 8px;border-radius:6px;border:1px solid var(--line);background:var(--pocket);color:var(--ink);width:min(260px,100%)">`;
     b("Connect", ()=>{ const t=$("tok").value; if(t.trim()) connect(t); else flash("Paste your GitHub key first."); }, true);
   }
   b("Save backup", exportFile); b("Load backup", importFile);
@@ -746,7 +766,7 @@ function renderHome(){
         <span class="badge" title="Set code ${esc(m.code)}">${PKSYM[m.id]?`<img src="https://site.pkmn.gg/images/sets/symbols/${PKSYM[m.id]}.webp" alt="" loading="lazy" onerror="this.remove()">`:""}<b>${esc(m.code)}</b></span></div>
         <div><div class="nm">${esc(m.title)}</div><div class="dt">${new Date(m.date).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})}${m.sub?" · "+esc(m.sub):""} · ${esc(m.code)}</div></div>
         <div class="prog"><div class="bar"><i style="width:${p}%"></i></div><b>${st?p+"%":"…"}</b></div>
-        <div class="sub">${st?`${st.own} / ${st.total} collected${countMode(m.id)==="one"?" · one per card":""}`:((progress.sets[m.id]||[]).length?`${progress.sets[m.id].length} collected · `:"")+(sr.lazy&&!wanted(sr)?"open series to load":"loading cards…")}</div>
+        <div class="sub">${st?`${st.own} / ${st.total} collected${countMode(m.id)==="one"?" · one per card":""}`:((progress.sets[m.id]||[]).length?`${progress.sets[m.id].length} collected · `:"")+(bundleBuilt&&sr.lazy&&!wanted(sr)?"open series to load":"loading cards…")}</div>
       </a>`;
     }).join("");
     if(sr.id!=="special"){ gOwn+=sOwn; gTot+=sTot; }
@@ -762,12 +782,14 @@ function renderHome(){
 }
 $("serieslist").addEventListener("change", e=>{ const s=e.target.closest("[data-count-sr]"); if(!s) return; setCount("series", s.dataset.countSr, s.value); renderHome(); });
 const wanted = sr => !sr.lazy || openSeries[sr.id];
-async function loadSeries(sr, force){
-  await pool(sr.sets.filter(m=>!m.local), 4, async m=>{ try{ await fetchSet(m.id, force); }catch(e){} if(view==="home") renderHome(); });
+async function loadSeries(sr){
+  await bundleReady;
+  await pool(sr.sets.filter(m=>!m.local && !cache[m.id]), 4, async m=>{ try{ await fetchSet(m.id); }catch(e){} if(view==="home") renderHome(); });
 }
-async function loadAll(force){
-  const todo = SERIES.filter(wanted).flatMap(s=>s.sets).filter(m=>!m.local);
-  await pool(todo, 4, async m=>{ try{ await fetchSet(m.id, force); }catch(e){} if(view==="home") renderHome(); else if(view==="set" && setId===m.id) renderSet(); });
+async function loadAll(){
+  await bundleReady;
+  const todo = SERIES.filter(wanted).flatMap(s=>s.sets).filter(m=>!m.local && !cache[m.id]);
+  await pool(todo, 4, async m=>{ try{ await fetchSet(m.id); }catch(e){} if(view==="home") renderHome(); else if(view==="set" && setId===m.id) renderSet(); });
 }
 
 /* ---------- binder ---------- */
@@ -903,7 +925,7 @@ function route(){
     const jumps = m.local ? SETS.find(s=>s.id===id).jumps : (cache[id] ? (cache[id].official < cache[id].rows.length ? [[1,"Main set"],[cache[id].official+1,"Secret rares"]] : [[1,"Start"]]) : []);
     $("jump").innerHTML = `<option value="">Jump to…</option>` + jumps.map(([n,l])=>`<option value="${n}">${esc(l)}</option>`).join("");
     show("set");
-    if(!m.local && !cache[id]) fetchSet(id).then(()=>{ if(setId===id) route(); }).catch(()=>{ $("binder").innerHTML=`<div class="loading" style="grid-column:1/-1">Couldn't load this set from TCGdex. Check you're online and refresh.</div>`; });
+    if(!m.local && !cache[id]) bundleReady.then(()=> cache[id] || fetchSet(id)).then(()=>{ if(view==="set" && setId===id) route(); }).catch(()=>{ if(setId===id) $("binder").innerHTML=`<div class="loading" style="grid-column:1/-1">Couldn't load this set. Check you're online and refresh.</div>`; });
     renderSet(); window.scrollTo(0,0);
   } else if(h==="wishlist"){
     view = "wish"; show("wish"); renderWish(); window.scrollTo(0,0);
@@ -953,7 +975,13 @@ $("countmode").addEventListener("change", e=>{ setCount("sets", setId, e.target.
 const imgBtn = () => { $("imgtoggle").textContent = "Pictures: " + (showImg ? "on" : "off"); $("imgtoggle").setAttribute("aria-pressed", String(showImg)); };
 $("imgtoggle").onclick = () => { showImg = !showImg; try{ localStorage.setItem("pkmn-binder-img", showImg ? "on" : "off"); }catch(e){} imgBtn(); renderSet(); };
 imgBtn();
-$("refresh").onclick = async e => { e.target.disabled = true; e.target.textContent = "Refreshing…"; await loadAll(true); e.target.textContent = "Refreshed"; };
+$("refresh").onclick = async e => {
+  e.target.disabled = true; e.target.textContent = "Refreshing…";
+  await loadBundle(true);
+  const todo = allSets().filter(m=>!m.local && !(cache[m.id]&&cache[m.id].bundled));
+  await pool(todo, 4, async m=>{ try{ await fetchSet(m.id, true); }catch(err){} });
+  route(); e.target.textContent = "Refreshed";
+};
 let lastView = perView();
 addEventListener("resize", ()=>{ if(view==="set" && perView()!==lastView){ const p=spread*lastView; lastView=perView(); spread=Math.floor(p/lastView); renderSet(); } else lastView=perView(); });
 document.addEventListener("visibilitychange", async()=>{ if(!document.hidden && gh.token && syncState==="ok"){ try{ await pull(); render(); }catch(e){} } });
@@ -998,7 +1026,9 @@ async function runImport(){
 }
 
 route();
-Promise.all([initFile(), loadAll(false)]).then(runImport);
+bundleReady.then(()=>route());
+try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
+Promise.all([initFile(), loadAll()]).then(runImport);
 </script>
 </body>
 </html>
